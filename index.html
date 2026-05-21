@@ -220,6 +220,30 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 </head>
 <body>
 
+<!-- PANTALLA DE LOGIN -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;z-index:999;background:#1a2744;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:40px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.35)">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="width:52px;height:52px;background:#c8973a;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#1a2744;margin-bottom:12px">GS</div>
+      <div style="font-size:18px;font-weight:700;color:#1a2744">GSG Seguros</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:2px">Sistema de gestión privado</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Correo</label>
+      <input type="email" id="loginEmail" placeholder="correo@ejemplo.com" onkeydown="if(event.key==='Enter')hacerLogin()" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Contraseña</label>
+      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')hacerLogin()" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box">
+    </div>
+    <div id="loginError" style="display:none;background:#fee2e2;color:#dc2626;border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px;text-align:center">Correo o contraseña incorrectos.</div>
+    <button onclick="hacerLogin()" style="width:100%;padding:12px;border-radius:8px;background:#1a2744;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Entrar al dashboard</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="appWrap" style="display:none;width:100%;height:100vh;overflow:hidden">
+
 <!-- SIDEBAR -->
 <nav id="sidebar">
   <div class="sidebar-brand">
@@ -510,6 +534,8 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
     </div>
   </div>
 </div>
+
+</div><!-- /appWrap -->
 
 <div id="toast"></div>
 
@@ -1110,7 +1136,34 @@ async function exportarExcel(tipo) {
 
 
 // ─── INIT ────────────────────────────────────────────────────
-window.addEventListener("DOMContentLoaded", cargarDatos);
+// ─── LOGIN ───────────────────────────────────────────────────
+const USUARIO = 'agente.gsgseguros@gmail.com';
+const CONTRASENA = 'GSGSeguros2025';
+
+function hacerLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginError');
+  if (email === USUARIO && pass === CONTRASENA) {
+    sessionStorage.setItem('gsg_ok', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appWrap').style.display = 'flex';
+    cargarDatos();
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('gsg_ok')) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appWrap').style.display = 'flex';
+    cargarDatos();
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('appWrap').style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
