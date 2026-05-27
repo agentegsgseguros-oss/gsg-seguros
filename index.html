@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -171,8 +172,7 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 <div id="loginScreen" style="display:flex;position:fixed;inset:0;z-index:999;background:#1a2744;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:16px;padding:40px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.35)">
     <div style="text-align:center;margin-bottom:24px">
-      <div style="width:52px;height:52px;background:#c8973a;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#1a2744;margin-bottom:12px">GS</div>
-      <div style="font-size:18px;font-weight:700;color:#1a2744">GSG Seguros</div>
+      <img src="logo-claro.png" alt="GSG Seguros" style="width:150px;height:auto;display:block;margin:0 auto 8px">
       <div style="font-size:12px;color:#6b7280;margin-top:2px">Sistema de gestion privado</div>
     </div>
     <div style="margin-bottom:12px">
@@ -205,6 +205,7 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
     <div class="nav-item" onclick="showSection('aseguradoras',this)"><span class="nav-icon">🏢</span> Aseguradoras</div>
     <div class="nav-item" onclick="showSection('clientes',this)"><span class="nav-icon">👥</span> Clientes y Polizas</div>
     <div class="nav-label">Gestion</div>
+    <div class="nav-item" onclick="showSection('documentos',this)"><span class="nav-icon">📁</span> Documentos</div>
     <div class="nav-item" onclick="showSection('agenda',this)"><span class="nav-icon">📅</span> Agenda</div>
     <div class="nav-item" onclick="showSection('exportar',this)"><span class="nav-icon">📊</span> Exportar</div>
   </div>
@@ -292,6 +293,8 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
           <button class="btn btn-outline btn-sm" onclick="abrirFormPoliza(currentClienteId)">+ Nueva poliza</button>
           <button class="btn btn-outline btn-sm" id="btnEditarCliente">Editar cliente</button>
           <button class="btn btn-outline btn-sm" onclick="abrirFormTareaCliente(currentClienteId)">+ Tarea</button>
+          <button class="btn btn-outline btn-sm" onclick="abrirCarpetaClienteEnDrive(currentClienteId)" style="background:#e8f0fe;color:#1a73e8;border-color:#1a73e8">📁 Ver Drive</button>
+          <button class="btn btn-outline btn-sm" onclick="manejarSubidaArchivo(currentClienteId,null)" style="background:#e8f0fe;color:#1a73e8;border-color:#1a73e8">⬆ Subir doc</button>
           <button class="btn btn-danger btn-sm" id="btnEliminarCliente">Eliminar</button>
         </div>
       </div>
@@ -360,6 +363,70 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 <div id="toast"></div>
 
 <script>
+// ─── GOOGLE DRIVE CONFIG ──────────────────────────────────
+const DRIVE_CLIENT_ID='1015959485065-ujr6ttrrf5nc6vteho2c4n6j725466m8.apps.googleusercontent.com';
+const DRIVE_FOLDER_ROOT='1rHExbEfswmC3TrIp89ACXT_ZMtmihxmY';
+const DRIVE_SCOPES='https://www.googleapis.com/auth/drive.file';
+let driveToken=null;
+
+async function iniciarDrive(){
+  return new Promise((resolve,reject)=>{
+    if(driveToken){resolve(driveToken);return;}
+    const client=google.accounts.oauth2.initTokenClient({
+      client_id:DRIVE_CLIENT_ID,
+      scope:DRIVE_SCOPES,
+      callback:(resp)=>{
+        if(resp.error){reject(resp.error);return;}
+        driveToken=resp.access_token;
+        resolve(driveToken);
+      }
+    });
+    client.requestAccessToken();
+  });
+}
+
+async function crearCarpetaCliente(nombreCliente){
+  try{
+    const token=await iniciarDrive();
+    // Verificar si ya existe
+    const buscar=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${nombreCliente}' and '${DRIVE_FOLDER_ROOT}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,{headers:{Authorization:`Bearer ${token}`}});
+    const res=await buscar.json();
+    if(res.files&&res.files.length>0)return res.files[0].id;
+    // Crear nueva carpeta
+    const crear=await fetch('https://www.googleapis.com/drive/v3/files',{
+      method:'POST',
+      headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({name:nombreCliente,mimeType:'application/vnd.google-apps.folder',parents:[DRIVE_FOLDER_ROOT]})
+    });
+    const carpeta=await crear.json();
+    return carpeta.id;
+  }catch(e){
+    console.error('Error Drive:',e);
+    return null;
+  }
+}
+
+async function listarDocumentosCliente(folderId){
+  try{
+    const token=await iniciarDrive();
+    const res=await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType,webViewLink,createdTime)`,{headers:{Authorization:`Bearer ${token}`}});
+    const data=await res.json();
+    return data.files||[];
+  }catch(e){return[];}
+}
+
+async function subirArchivoDrive(file,folderId){
+  try{
+    const token=await iniciarDrive();
+    const metadata={name:file.name,parents:[folderId]};
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+    form.append('file',file);
+    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:`Bearer ${token}`},body:form});
+    return await res.json();
+  }catch(e){return null;}
+}
+
 const SUPABASE_URL='https://lwkwkkzkaukgnejdddll.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3a3dra3prYXVrZ25lamRkZGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjM3MDEsImV4cCI6MjA5NDI5OTcwMX0.1VDxs7AoVLs8GOoe5tGw3NO29CCifog2Od08nhHiGao';
 const {createClient}=supabase;
@@ -680,6 +747,132 @@ async function exportarExcel(tipo){
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Datos');
   XLSX.writeFile(wb,nombre+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
   toast('Archivo Excel descargado','success');
+}
+
+// ─── GOOGLE DRIVE ─────────────────────────────────────────────
+const DRIVE_CLIENT_ID = '1015959485065-ujr6ttrrf5nc6vteho2c4n6j725466m8.apps.googleusercontent.com';
+const DRIVE_ROOT_FOLDER = '1rHExbEfswmC3TrIp89ACXT_ZMtmihxmY';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+let driveToken = null;
+
+function cargarGoogleAPI() {
+  return new Promise((resolve) => {
+    if (window.google && window.google.accounts) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = resolve;
+    document.head.appendChild(s);
+  });
+}
+
+async function autenticarDrive() {
+  await cargarGoogleAPI();
+  return new Promise((resolve, reject) => {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: DRIVE_CLIENT_ID,
+      scope: DRIVE_SCOPE,
+      callback: (resp) => {
+        if (resp.error) { reject(resp.error); return; }
+        driveToken = resp.access_token;
+        resolve(driveToken);
+      }
+    });
+    client.requestAccessToken();
+  });
+}
+
+async function crearCarpetaDrive(nombre, padreId) {
+  if (!driveToken) await autenticarDrive();
+  const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${driveToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: nombre, mimeType: 'application/vnd.google-apps.folder', parents: [padreId] })
+  });
+  const data = await res.json();
+  return data.id;
+}
+
+async function buscarCarpetaDrive(nombre, padreId) {
+  if (!driveToken) await autenticarDrive();
+  const q = encodeURIComponent(`name='${nombre}' and '${padreId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+    headers: { 'Authorization': `Bearer ${driveToken}` }
+  });
+  const data = await res.json();
+  return data.files?.[0]?.id || null;
+}
+
+async function obtenerOCrearCarpetaCliente(nombreCliente) {
+  try {
+    if (!driveToken) await autenticarDrive();
+    let carpetaId = await buscarCarpetaDrive(nombreCliente, DRIVE_ROOT_FOLDER);
+    if (!carpetaId) {
+      carpetaId = await crearCarpetaDrive(nombreCliente, DRIVE_ROOT_FOLDER);
+      toast(`Carpeta creada en Drive: ${nombreCliente}`, 'success');
+    }
+    return carpetaId;
+  } catch (e) {
+    toast('Error al conectar con Google Drive', 'error');
+    return null;
+  }
+}
+
+async function subirArchivoDrive(archivo, carpetaId, clienteId, polizaId) {
+  if (!driveToken) await autenticarDrive();
+  const meta = { name: archivo.name, parents: [carpetaId] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+  form.append('file', archivo);
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${driveToken}` },
+    body: form
+  });
+  const data = await res.json();
+  if (data.id) {
+    await db.from('documentos').insert({
+      cliente_id: clienteId,
+      poliza_id: polizaId || null,
+      nombre_archivo: archivo.name,
+      tipo: 'otro',
+      drive_file_id: data.id,
+      drive_url: data.webViewLink
+    });
+    toast(`Archivo subido: ${archivo.name}`, 'success');
+    return data;
+  }
+  throw new Error('Error al subir archivo');
+}
+
+async function abrirCarpetaClienteEnDrive(clienteId) {
+  const c = allClientes.find(x => x.id === clienteId);
+  if (!c) return;
+  toast('Conectando con Google Drive...', '');
+  const carpetaId = await obtenerOCrearCarpetaCliente(c.nombre_completo);
+  if (carpetaId) {
+    window.open(`https://drive.google.com/drive/folders/${carpetaId}`, '_blank');
+    await db.from('clientes').update({ notas: c.notas }).eq('id', clienteId);
+  }
+}
+
+async function manejarSubidaArchivo(clienteId, polizaId) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx';
+  input.onchange = async (e) => {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+    const c = allClientes.find(x => x.id === clienteId);
+    if (!c) return;
+    toast('Subiendo archivo...', '');
+    try {
+      const carpetaId = await obtenerOCrearCarpetaCliente(c.nombre_completo);
+      if (carpetaId) await subirArchivoDrive(archivo, carpetaId, clienteId, polizaId);
+    } catch (err) {
+      toast('Error al subir el archivo', 'error');
+    }
+  };
+  input.click();
 }
 </script>
 </body>
