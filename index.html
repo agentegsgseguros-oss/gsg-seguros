@@ -4,39 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GSG Seguros — Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-/* LOGIN SCREEN */
-#loginScreen{
-  display:none;position:fixed;inset:0;z-index:999;
-  background:var(--navy);
-  align-items:center;justify-content:center;flex-direction:column;gap:0;
-}
-#loginScreen.visible{display:flex}
-.login-card{
-  background:#fff;border-radius:16px;padding:40px 44px;
-  width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.3);
-}
-.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center}
-.login-logo-icon{width:48px;height:48px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--navy)}
-.login-logo-text{font-size:20px;font-weight:700;color:var(--navy)}
-.login-logo-sub{font-size:12px;color:var(--text-muted);margin-top:1px}
-.login-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;text-align:center}
-.login-sub{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:24px}
-.login-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-.login-field label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
-.login-field input{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--navy);outline:none;font-family:inherit;transition:border .15s}
-.login-field input:focus{border-color:var(--navy)}
-.login-btn{width:100%;padding:11px;border-radius:8px;background:var(--navy);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:background .15s}
-.login-btn:hover{background:var(--navy-hover)}
-.login-error{background:var(--red-bg);color:var(--red);border-radius:6px;padding:8px 12px;font-size:12px;margin-top:8px;display:none;text-align:center}
-.login-error.show{display:block}
-.login-footer{text-align:center;margin-top:20px;font-size:12px;color:var(--text-muted)}
-</style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --navy:#1a2744;--navy-light:#243156;--navy-hover:#2d3d6b;
@@ -49,11 +21,8 @@
   --red:#dc2626;--red-bg:#fee2e2;
   --blue:#2563eb;--blue-bg:#dbeafe;
   --radius:8px;--radius-lg:12px;
-  --shadow:0 1px 3px rgba(0,0,0,.08);
 }
 body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;display:flex;height:100vh;overflow:hidden}
-
-/* SIDEBAR */
 #sidebar{width:224px;min-width:224px;background:var(--navy);display:flex;flex-direction:column;height:100vh}
 .sidebar-brand{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand-logo{display:flex;align-items:center;gap:10px}
@@ -71,37 +40,26 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .agent-avatar{width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);flex-shrink:0}
 .agent-name{color:#fff;font-size:12px;font-weight:600;line-height:1.3}
 .agent-role{color:rgba(255,255,255,.4);font-size:11px}
-
-/* MAIN */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .page-title{font-size:15px;font-weight:700;color:var(--text)}
 .topbar-actions{display:flex;gap:8px}
 #content{flex:1;overflow-y:auto;padding:24px}
-
-/* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:inherit}
 .btn-primary{background:var(--navy);color:#fff}
 .btn-primary:hover{background:var(--navy-hover)}
 .btn-gold{background:var(--gold);color:var(--navy)}
-.btn-gold:hover{background:var(--gold-light)}
 .btn-outline{background:#fff;color:var(--text);border-color:var(--border)}
 .btn-outline:hover{background:var(--bg)}
 .btn-danger{background:var(--red-bg);color:var(--red);border-color:#fca5a5}
 .btn-sm{padding:5px 10px;font-size:12px}
 .btn-icon{width:30px;height:30px;padding:0;justify-content:center}
-
-/* SECTIONS */
 .section{display:none}
 .section.active{display:block}
-
-/* CARDS */
 .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .card-title{font-size:14px;font-weight:700;color:var(--text)}
 .card-link{font-size:12px;color:var(--gold);cursor:pointer;font-weight:600}
-
-/* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
 .kpi-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;position:relative;overflow:hidden}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
@@ -112,37 +70,25 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .kpi-label{font-size:11px;color:var(--text-muted);font-weight:500;margin-bottom:6px}
 .kpi-value{font-size:26px;font-weight:700;color:var(--text);line-height:1}
 .kpi-sub{font-size:11px;color:var(--text-light);margin-top:4px}
-
-/* GRID */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
-
-/* CHART */
 .chart-wrap{height:150px;display:flex;align-items:flex-end;gap:8px;padding-top:8px}
 .bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
 .bar{width:100%;border-radius:4px 4px 0 0;background:var(--navy);min-height:4px}
 .bar-label{font-size:10px;color:var(--text-muted)}
 .bar-val{font-size:10px;font-weight:600;color:var(--text-muted)}
-
-/* TABLES */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{text-align:left;padding:10px 12px;font-weight:600;color:var(--text-muted);font-size:11px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 tbody td{padding:11px 12px;border-bottom:1px solid var(--border-light);vertical-align:middle}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover{background:#fafbfc;cursor:pointer}
-
-/* AVATARES */
 .avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-
-/* BADGES */
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
 .badge-green{background:var(--green-bg);color:var(--green)}
 .badge-amber{background:var(--amber-bg);color:var(--amber)}
 .badge-red{background:var(--red-bg);color:var(--red)}
 .badge-blue{background:var(--blue-bg);color:var(--blue)}
 .badge-gray{background:#f3f4f6;color:#6b7280}
-
-/* ASEGURADORAS */
 .aseg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .aseg-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s;border-top:3px solid}
 .aseg-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
@@ -151,14 +97,10 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 .aseg-row{display:flex;justify-content:space-between;margin-top:8px;font-size:12px}
 .aseg-stat-val{font-size:20px;font-weight:700}
 .aseg-stat-lbl{font-size:10px;color:var(--text-muted)}
-
-/* FILTERS */
 .filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .search-box{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:0 12px;height:34px}
 .search-box input{border:none;outline:none;width:100%;font-size:13px;background:transparent;font-family:inherit}
 .filter-select{height:34px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;background:var(--white);color:var(--text);outline:none;font-family:inherit;cursor:pointer}
-
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
 .modal{background:var(--white);border-radius:var(--radius-lg);width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
@@ -166,8 +108,6 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 .modal-title{font-size:15px;font-weight:700}
 .modal-body{padding:24px}
 .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
-
-/* FORM */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form-group{display:flex;flex-direction:column;gap:5px}
 .form-group.full{grid-column:1/-1}
@@ -175,8 +115,6 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 .form-group input,.form-group select,.form-group textarea{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;color:var(--text);background:var(--white);outline:none;font-family:inherit;transition:border .15s}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy)}
 .form-group textarea{resize:vertical;min-height:70px}
-
-/* FICHA */
 .ficha-section{margin-bottom:20px}
 .ficha-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border-light)}
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -188,8 +126,6 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 .poliza-item-detail{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:12px}
 .poliza-item-detail span{color:var(--text-muted);display:block;font-size:10px;text-transform:uppercase}
 .poliza-item-detail b{font-weight:500;display:block;margin-top:1px}
-
-/* AGENDA */
 .agenda-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
 .agenda-tab{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--white);border:1px solid var(--border);color:var(--text-muted);transition:all .15s}
 .agenda-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -199,39 +135,28 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 .tarea-body{flex:1}
 .tarea-titulo{font-size:13px;font-weight:500}
 .tarea-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
-
-/* EXPORTAR */
 .export-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .export-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:flex;align-items:flex-start;gap:14px}
 .export-icon{width:42px;height:42px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .export-title{font-size:13px;font-weight:700;margin-bottom:3px}
 .export-desc{font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.5}
-
-/* ACTIVITY */
 .activity-list{list-style:none}
 .activity-list li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-light);font-size:12px}
 .activity-list li:last-child{border-bottom:none}
 .act-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .act-time{margin-left:auto;color:var(--text-light);white-space:nowrap}
-
-/* LOADING */
 .loading{text-align:center;padding:40px;color:var(--text-muted);font-size:13px}
 .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* TOAST */
 #toast{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
 .toast-item{background:var(--navy);color:#fff;padding:10px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);animation:slideIn .2s ease}
 .toast-item.success{background:var(--green)}
 .toast-item.error{background:var(--red)}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-
-/* UTILS */
 .flex{display:flex}.items-center{align-items:center}.gap-8{gap:8px}.gap-12{gap:12px}
 .mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}
 .text-muted{color:var(--text-muted)}.text-sm{font-size:12px}.fw-700{font-weight:700}
 .empty{text-align:center;padding:40px;color:var(--text-muted);font-size:13px}
-
 @media(max-width:768px){
   #sidebar{display:none}
   .kpi-grid{grid-template-columns:1fr 1fr}
@@ -244,22 +169,28 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginScreen" style="position:fixed;inset:0;z-index:999;background:#1a2744;display:flex;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:16px;padding:40px 44px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.3)">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center"><div style="width:48px;height:48px;background:#c8973a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#1a2744">GS</div><div><div style="font-size:20px;font-weight:700;color:#1a2744">GSG Seguros</div><div style="font-size:12px;color:#6b7280">Agente Independiente</div></div></div>
-    <div style="font-size:16px;font-weight:700;color:#1a2744;margin-bottom:4px;text-align:center">Bienvenido de vuelta</div>
-    <div style="font-size:13px;color:#6b7280;text-align:center;margin-bottom:24px">Ingresa tus credenciales para acceder</div>
-    <div style="margin-bottom:14px"><label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px">Correo</label><input type="email" id="loginEmail" placeholder="tu@correo.com" onkeydown="if(event.key==='Enter')hacerLogin()" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit"></div>
-    <div style="margin-bottom:14px"><label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:5px">Contraseña</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')hacerLogin()" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit"></div>
-    <div id="loginError" style="display:none;background:#fee2e2;color:#dc2626;border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:8px;text-align:center">Correo o contraseña incorrectos.</div>
-    <button onclick="hacerLogin()" style="width:100%;padding:11px;border-radius:8px;background:#1a2744;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Entrar al dashboard</button>
-    <div style="text-align:center;margin-top:16px;font-size:12px;color:#9ca3af">GSG Seguros · Sistema privado</div>
+<div id="loginScreen" style="display:flex;position:fixed;inset:0;z-index:999;background:#1a2744;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:40px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.35)">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="width:52px;height:52px;background:#c8973a;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#1a2744;margin-bottom:12px">GS</div>
+      <div style="font-size:18px;font-weight:700;color:#1a2744">GSG Seguros</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:2px">Sistema de gestion privado</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Correo</label>
+      <input type="email" id="loginEmail" placeholder="correo@ejemplo.com" onkeydown="if(event.key==='Enter')hacerLogin()" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Contrasena</label>
+      <input type="password" id="loginPass" placeholder="password" onkeydown="if(event.key==='Enter')hacerLogin()" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box">
+    </div>
+    <div id="loginError" style="display:none;background:#fee2e2;color:#dc2626;border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px;text-align:center">Correo o contrasena incorrectos.</div>
+    <button onclick="hacerLogin()" style="width:100%;padding:12px;border-radius:8px;background:#1a2744;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Entrar al dashboard</button>
   </div>
 </div>
 
-<!-- SIDEBAR -->
-<nav id="sidebar" style="display:none">
+<div id="appWrap" style="display:none;width:100%;overflow:hidden;flex:1">
+<nav id="sidebar">
   <div class="sidebar-brand">
     <div class="brand-logo">
       <div class="brand-icon">GS</div>
@@ -271,119 +202,59 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
   </div>
   <div class="sidebar-nav">
     <div class="nav-label">Principal</div>
-    <div class="nav-item active" onclick="showSection('inicio',this)">
-      <span class="nav-icon">🏠</span> Inicio
-    </div>
-    <div class="nav-item" onclick="showSection('aseguradoras',this)">
-      <span class="nav-icon">🏢</span> Aseguradoras
-    </div>
-    <div class="nav-item" onclick="showSection('clientes',this)">
-      <span class="nav-icon">👥</span> Clientes y Pólizas
-    </div>
-    <div class="nav-label">Gestión</div>
-    <div class="nav-item" onclick="showSection('agenda',this)">
-      <span class="nav-icon">📅</span> Agenda
-    </div>
-    <div class="nav-item" onclick="showSection('exportar',this)">
-      <span class="nav-icon">📊</span> Exportar
-    </div>
+    <div class="nav-item active" onclick="showSection('inicio',this)"><span class="nav-icon">🏠</span> Inicio</div>
+    <div class="nav-item" onclick="showSection('aseguradoras',this)"><span class="nav-icon">🏢</span> Aseguradoras</div>
+    <div class="nav-item" onclick="showSection('clientes',this)"><span class="nav-icon">👥</span> Clientes y Polizas</div>
+    <div class="nav-label">Gestion</div>
+    <div class="nav-item" onclick="showSection('documentos',this)"><span class="nav-icon">📁</span> Documentos</div>
+    <div class="nav-item" onclick="showSection('agenda',this)"><span class="nav-icon">📅</span> Agenda</div>
+    <div class="nav-item" onclick="showSection('exportar',this)"><span class="nav-icon">📊</span> Exportar</div>
   </div>
   <div class="sidebar-footer">
     <div class="agent-info">
       <div class="agent-avatar">GS</div>
       <div>
-        <div class="agent-name">Gabriel Solano García</div>
+        <div class="agent-name">Gabriel Solano Garcia</div>
         <div class="agent-role">Agente GSG Seguros</div>
       </div>
     </div>
   </div>
 </nav>
-
-<!-- MAIN -->
-<div id="main" style="display:none">
+<div id="main">
   <div class="topbar">
     <div class="page-title" id="pageTitle">Panel Principal</div>
     <div class="topbar-actions">
-      <button class="btn btn-outline btn-sm" onclick="showSection('agenda',document.querySelectorAll('.nav-item')[3]);setTimeout(abrirFormTarea,100)">
-        + Nueva tarea
-      </button>
-      <button class="btn btn-primary btn-sm" onclick="showSection('clientes',document.querySelectorAll('.nav-item')[2]);setTimeout(abrirFormCliente,100)">
-        + Nuevo cliente
-      </button>
+      <button class="btn btn-outline btn-sm" onclick="showSection('agenda',document.querySelectorAll('.nav-item')[3]);setTimeout(abrirFormTarea,100)">+ Nueva tarea</button>
+      <button class="btn btn-primary btn-sm" onclick="showSection('clientes',document.querySelectorAll('.nav-item')[2]);setTimeout(abrirFormCliente,100)">+ Nuevo cliente</button>
     </div>
   </div>
   <div id="content">
-
-    <!-- INICIO -->
     <div id="sec-inicio" class="section active">
-      <div class="kpi-grid" id="kpiGrid">
-        <div class="kpi-card blue"><div class="kpi-label">Clientes activos</div><div class="kpi-value" id="kpiClientes">—</div><div class="kpi-sub">Total registrados</div></div>
-        <div class="kpi-card gold"><div class="kpi-label">Pólizas por vencer (30 días)</div><div class="kpi-value" id="kpiPorVencer">—</div><div class="kpi-sub">Requieren atención</div></div>
-        <div class="kpi-card red"><div class="kpi-label">Pólizas vencidas</div><div class="kpi-value" id="kpiVencidas">—</div><div class="kpi-sub">Pendiente renovar</div></div>
-        <div class="kpi-card green"><div class="kpi-label">Prima total anual</div><div class="kpi-value" id="kpiPrima">—</div><div class="kpi-sub">Suma de pólizas activas</div></div>
+      <div class="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-label">Clientes activos</div><div class="kpi-value" id="kpiClientes">--</div><div class="kpi-sub">Total registrados</div></div>
+        <div class="kpi-card gold"><div class="kpi-label">Polizas por vencer (30 dias)</div><div class="kpi-value" id="kpiPorVencer">--</div><div class="kpi-sub">Requieren atencion</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Polizas vencidas</div><div class="kpi-value" id="kpiVencidas">--</div><div class="kpi-sub">Pendiente renovar</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Prima total anual</div><div class="kpi-value" id="kpiPrima">--</div><div class="kpi-sub">Suma de polizas activas</div></div>
       </div>
       <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Primas por aseguradora</div></div>
-          <div class="chart-wrap" id="chartWrap"><div class="loading"><span class="spinner"></span>Cargando...</div></div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Pólizas próximas a vencer</div>
-            <span class="card-link" onclick="showSection('clientes',document.querySelectorAll('.nav-item')[2])">Ver todas →</span>
-          </div>
-          <div id="proximasTable"><div class="loading"><span class="spinner"></span>Cargando...</div></div>
-        </div>
+        <div class="card"><div class="card-header"><div class="card-title">Primas por aseguradora</div></div><div class="chart-wrap" id="chartWrap"><div class="loading"><span class="spinner"></span>Cargando...</div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">Polizas proximas a vencer</div><span class="card-link" onclick="showSection('clientes',document.querySelectorAll('.nav-item')[2])">Ver todas</span></div><div id="proximasTable"><div class="loading"><span class="spinner"></span>Cargando...</div></div></div>
       </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Actividad reciente</div></div>
-        <ul class="activity-list" id="activityList"><li><div class="loading"><span class="spinner"></span>Cargando...</div></li></ul>
-      </div>
+      <div class="card"><div class="card-header"><div class="card-title">Actividad reciente</div></div><ul class="activity-list" id="activityList"><li><div class="loading"><span class="spinner"></span>Cargando...</div></li></ul></div>
     </div>
-
-    <!-- ASEGURADORAS -->
     <div id="sec-aseguradoras" class="section">
       <div class="aseg-grid" id="asegGrid"></div>
-      <div class="card">
-        <div class="card-header"><div class="card-title" id="asegTableTitle">Todas las pólizas</div></div>
-        <div class="table-wrap">
-          <table><thead><tr><th>Cliente</th><th>Aseguradora</th><th>Tipo</th><th>N° Póliza</th><th>Prima</th><th>Vencimiento</th><th>Estado</th></tr></thead>
-          <tbody id="asegTableBody"><tr><td colspan="7"><div class="loading"><span class="spinner"></span>Cargando...</div></td></tr></tbody></table>
-        </div>
-      </div>
+      <div class="card"><div class="card-header"><div class="card-title" id="asegTableTitle">Todas las polizas</div></div><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Aseguradora</th><th>Tipo</th><th>N Poliza</th><th>Prima</th><th>Vencimiento</th><th>Estado</th></tr></thead><tbody id="asegTableBody"><tr><td colspan="7"><div class="loading"><span class="spinner"></span>Cargando...</div></td></tr></tbody></table></div></div>
     </div>
-
-    <!-- CLIENTES -->
     <div id="sec-clientes" class="section">
       <div class="filter-bar">
-        <div class="search-box">
-          <span>🔍</span>
-          <input type="text" id="clienteSearch" placeholder="Buscar por nombre, RFC..." oninput="filtrarClientes()">
-        </div>
-        <select class="filter-select" id="filterAseg" onchange="filtrarClientes()">
-          <option value="">Todas las aseguradoras</option>
-          <option>GNP</option><option>CHUBB</option><option>AXA</option>
-          <option>Qualitas</option><option>HDI</option><option>MAPFRE</option><option>Banorte</option>
-        </select>
-        <select class="filter-select" id="filterEstado" onchange="filtrarClientes()">
-          <option value="">Todos los estados</option>
-          <option value="activo">Activo</option>
-          <option value="por_vencer">Por vencer</option>
-          <option value="vencido">Vencido</option>
-        </select>
+        <div class="search-box"><span>🔍</span><input type="text" id="clienteSearch" placeholder="Buscar por nombre, RFC..." oninput="filtrarClientes()"></div>
+        <select class="filter-select" id="filterAseg" onchange="filtrarClientes()"><option value="">Todas las aseguradoras</option><option>GNP</option><option>CHUBB</option><option>AXA</option><option>Qualitas</option><option>HDI</option><option>MAPFRE</option><option>Banorte</option></select>
+        <select class="filter-select" id="filterEstado" onchange="filtrarClientes()"><option value="">Todos los estados</option><option value="activo">Activo</option><option value="por_vencer">Por vencer</option><option value="vencido">Vencido</option></select>
         <button class="btn btn-primary btn-sm" onclick="abrirFormCliente()">+ Agregar cliente</button>
       </div>
-      <div class="card" style="padding:0">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Cliente</th><th>RFC</th><th>Teléfono</th><th>Pólizas</th><th>Aseguradoras</th><th>Prima total</th><th></th></tr></thead>
-            <tbody id="clientesBody"><tr><td colspan="7"><div class="loading"><span class="spinner"></span>Cargando...</div></td></tr></tbody>
-          </table>
-        </div>
-      </div>
+      <div class="card" style="padding:0"><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>RFC</th><th>Telefono</th><th>Polizas</th><th>Aseguradoras</th><th>Prima total</th><th></th></tr></thead><tbody id="clientesBody"><tr><td colspan="7"><div class="loading"><span class="spinner"></span>Cargando...</div></td></tr></tbody></table></div></div>
     </div>
-
-    <!-- AGENDA -->
     <div id="sec-agenda" class="section">
       <div class="flex items-center mb-16" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
         <div class="agenda-tabs">
@@ -397,811 +268,613 @@ tbody tr:hover{background:#fafbfc;cursor:pointer}
       </div>
       <div id="agendaList"><div class="loading"><span class="spinner"></span>Cargando...</div></div>
     </div>
-
-    <!-- EXPORTAR -->
     <div id="sec-exportar" class="section">
       <div class="export-grid">
-        <div class="export-card">
-          <div class="export-icon" style="background:#dcfce7">📋</div>
-          <div><div class="export-title">Todas las pólizas</div><div class="export-desc">Catálogo completo con todos los estados y datos.</div>
-          <button class="btn btn-outline btn-sm" onclick="exportarExcel('todas')">⬇ Descargar Excel</button></div>
-        </div>
-        <div class="export-card">
-          <div class="export-icon" style="background:#fef3c7">⏰</div>
-          <div><div class="export-title">Por vencer (30 días)</div><div class="export-desc">Solo las pólizas que vencen próximamente.</div>
-          <button class="btn btn-outline btn-sm" onclick="exportarExcel('por_vencer')">⬇ Descargar Excel</button></div>
-        </div>
-        <div class="export-card">
-          <div class="export-icon" style="background:#dbeafe">👥</div>
-          <div><div class="export-title">Directorio de clientes</div><div class="export-desc">Lista completa con datos de contacto.</div>
-          <button class="btn btn-outline btn-sm" onclick="exportarExcel('clientes')">⬇ Descargar Excel</button></div>
-        </div>
-        <div class="export-card">
-          <div class="export-icon" style="background:#ede9fe">🏢</div>
-          <div><div class="export-title">Reporte por aseguradora</div><div class="export-desc">Pólizas y primas agrupadas por aseguradora.</div>
-          <button class="btn btn-outline btn-sm" onclick="exportarExcel('aseguradora')">⬇ Descargar Excel</button></div>
-        </div>
+        <div class="export-card"><div class="export-icon" style="background:#dcfce7">📋</div><div><div class="export-title">Todas las polizas</div><div class="export-desc">Catalogo completo con todos los estados y datos.</div><button class="btn btn-outline btn-sm" onclick="exportarExcel('todas')">Descargar Excel</button></div></div>
+        <div class="export-card"><div class="export-icon" style="background:#fef3c7">⏰</div><div><div class="export-title">Por vencer (30 dias)</div><div class="export-desc">Solo las polizas que vencen proximamente.</div><button class="btn btn-outline btn-sm" onclick="exportarExcel('por_vencer')">Descargar Excel</button></div></div>
+        <div class="export-card"><div class="export-icon" style="background:#dbeafe">👥</div><div><div class="export-title">Directorio de clientes</div><div class="export-desc">Lista completa con datos de contacto.</div><button class="btn btn-outline btn-sm" onclick="exportarExcel('clientes')">Descargar Excel</button></div></div>
+        <div class="export-card"><div class="export-icon" style="background:#ede9fe">🏢</div><div><div class="export-title">Reporte por aseguradora</div><div class="export-desc">Polizas y primas agrupadas por aseguradora.</div><button class="btn btn-outline btn-sm" onclick="exportarExcel('aseguradora')">Descargar Excel</button></div></div>
       </div>
     </div>
-
   </div>
 </div>
+</div>
 
-<!-- MODAL FICHA CLIENTE -->
 <div class="modal-overlay" id="fichaModal" onclick="if(event.target===this)cerrarModal('fichaModal')">
   <div class="modal" style="max-width:720px">
     <div class="modal-header">
-      <div class="flex items-center gap-12">
-        <div class="avatar" id="fichaAvatar" style="width:40px;height:40px;font-size:14px"></div>
-        <div><div class="fw-700" id="fichaNombre" style="font-size:15px"></div><div class="text-muted text-sm" id="fichaRFC"></div></div>
-      </div>
-      <button class="btn btn-outline btn-icon btn-sm" onclick="cerrarModal('fichaModal')">✕</button>
+      <div class="flex items-center gap-12"><div class="avatar" id="fichaAvatar" style="width:40px;height:40px;font-size:14px"></div><div><div class="fw-700" id="fichaNombre" style="font-size:15px"></div><div class="text-muted text-sm" id="fichaRFC"></div></div></div>
+      <button class="btn btn-outline btn-icon btn-sm" onclick="cerrarModal('fichaModal')">X</button>
     </div>
     <div class="modal-body">
-      <div class="ficha-section">
-        <div class="ficha-section-title">Datos personales</div>
-        <div class="info-grid" id="fichaInfo"></div>
-      </div>
-      <div class="ficha-section">
-        <div class="ficha-section-title">Pólizas</div>
-        <div id="fichaPolizas"></div>
-      </div>
-      <div class="ficha-section">
-        <div class="ficha-section-title">Acciones rápidas</div>
+      <div class="ficha-section"><div class="ficha-section-title">Datos personales</div><div class="info-grid" id="fichaInfo"></div></div>
+      <div class="ficha-section"><div class="ficha-section-title">Polizas</div><div id="fichaPolizas"></div></div>
+      <div class="ficha-section"><div class="ficha-section-title">Acciones rapidas</div>
         <div class="flex gap-8" style="flex-wrap:wrap">
-          <button class="btn btn-outline btn-sm" onclick="abrirFormPoliza(currentClienteId)">+ Nueva póliza</button>
-          <button class="btn btn-outline btn-sm" id="btnEditarCliente">✏ Editar cliente</button>
+          <button class="btn btn-outline btn-sm" onclick="abrirFormPoliza(currentClienteId)">+ Nueva poliza</button>
+          <button class="btn btn-outline btn-sm" id="btnEditarCliente">Editar cliente</button>
           <button class="btn btn-outline btn-sm" onclick="abrirFormTareaCliente(currentClienteId)">+ Tarea</button>
-          <button class="btn btn-danger btn-sm" id="btnEliminarCliente">🗑 Eliminar</button>
+          <button class="btn btn-outline btn-sm" onclick="abrirCarpetaClienteEnDrive(currentClienteId)" style="background:#e8f0fe;color:#1a73e8;border-color:#1a73e8">📁 Ver Drive</button>
+          <button class="btn btn-outline btn-sm" onclick="manejarSubidaArchivo(currentClienteId,null)" style="background:#e8f0fe;color:#1a73e8;border-color:#1a73e8">⬆ Subir doc</button>
+          <button class="btn btn-danger btn-sm" id="btnEliminarCliente">Eliminar</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL FORM CLIENTE -->
 <div class="modal-overlay" id="formClienteModal" onclick="if(event.target===this)cerrarModal('formClienteModal')">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="formClienteTitulo">Agregar cliente</div>
-      <button class="btn btn-outline btn-icon btn-sm" onclick="cerrarModal('formClienteModal')">✕</button>
-    </div>
+    <div class="modal-header"><div class="modal-title" id="formClienteTitulo">Agregar cliente</div><button class="btn btn-outline btn-icon btn-sm" onclick="cerrarModal('formClienteModal')">X</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="form-group full"><label>Nombre completo *</label><input id="fc_nombre" type="text" placeholder="Ej: María Ramos López"></div>
-        <div class="form-group"><label>Tipo</label>
-          <select id="fc_tipo"><option value="persona_fisica">Persona física</option><option value="empresa">Empresa</option></select></div>
+        <div class="form-group full"><label>Nombre completo *</label><input id="fc_nombre" type="text" placeholder="Ej: Maria Ramos Lopez"></div>
+        <div class="form-group"><label>Tipo</label><select id="fc_tipo"><option value="persona_fisica">Persona fisica</option><option value="empresa">Empresa</option></select></div>
         <div class="form-group"><label>RFC</label><input id="fc_rfc" type="text" placeholder="RALM800510HJL"></div>
-        <div class="form-group"><label>Teléfono / WhatsApp</label><input id="fc_tel" type="tel" placeholder="+52 33 1234 5678"></div>
-        <div class="form-group"><label>Correo electrónico</label><input id="fc_correo" type="email" placeholder="correo@ejemplo.com"></div>
-        <div class="form-group full"><label>Dirección</label><input id="fc_dir" type="text" placeholder="Av. Vallarta 1234, Guadalajara, Jal."></div>
-        <div class="form-group"><label>Código postal</label><input id="fc_cp" type="text" placeholder="44100"></div>
+        <div class="form-group"><label>Telefono / WhatsApp</label><input id="fc_tel" type="tel" placeholder="+52 33 1234 5678"></div>
+        <div class="form-group"><label>Correo electronico</label><input id="fc_correo" type="email" placeholder="correo@ejemplo.com"></div>
+        <div class="form-group full"><label>Direccion</label><input id="fc_dir" type="text" placeholder="Av. Vallarta 1234, Guadalajara, Jal."></div>
+        <div class="form-group"><label>Codigo postal</label><input id="fc_cp" type="text" placeholder="44100"></div>
         <div class="form-group"><label>Fecha de nacimiento</label><input id="fc_nac" type="date"></div>
         <div class="form-group full"><label>Notas</label><textarea id="fc_notas" placeholder="Observaciones del cliente..."></textarea></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="cerrarModal('formClienteModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarCliente()">Guardar cliente</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="cerrarModal('formClienteModal')">Cancelar</button><button class="btn btn-primary" onclick="guardarCliente()">Guardar cliente</button></div>
   </div>
 </div>
 
-<!-- MODAL FORM PÓLIZA -->
 <div class="modal-overlay" id="formPolizaModal" onclick="if(event.target===this)cerrarModal('formPolizaModal')">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Nueva póliza</div>
-      <button class="btn btn-outline btn-icon btn-sm" onclick="cerrarModal('formPolizaModal')">✕</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Nueva poliza</div><button class="btn btn-outline btn-icon btn-sm" onclick="cerrarModal('formPolizaModal')">X</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="form-group"><label>Aseguradora *</label>
-          <select id="fp_aseg">
-            <option value="">Seleccionar...</option>
-            <option>GNP</option><option>CHUBB</option><option>AXA</option>
-            <option>Qualitas</option><option>HDI</option><option>MAPFRE</option><option>Banorte</option>
-          </select></div>
-        <div class="form-group"><label>Tipo de seguro *</label><input id="fp_tipo" type="text" placeholder="Ej: Gastos Médicos, Auto..."></div>
-        <div class="form-group"><label>Número de póliza</label><input id="fp_num" type="text" placeholder="GNP-2025-0001"></div>
-        <div class="form-group"><label>Titular de la póliza</label><input id="fp_titular" type="text" placeholder="Nombre del titular"></div>
+        <div class="form-group"><label>Aseguradora *</label><select id="fp_aseg"><option value="">Seleccionar...</option><option>GNP</option><option>CHUBB</option><option>AXA</option><option>Qualitas</option><option>HDI</option><option>MAPFRE</option><option>Banorte</option></select></div>
+        <div class="form-group"><label>Tipo de seguro *</label><input id="fp_tipo" type="text" placeholder="Ej: Gastos Medicos, Auto..."></div>
+        <div class="form-group"><label>Numero de poliza</label><input id="fp_num" type="text" placeholder="GNP-2025-0001"></div>
+        <div class="form-group"><label>Titular de la poliza</label><input id="fp_titular" type="text" placeholder="Nombre del titular"></div>
         <div class="form-group"><label>Prima (monto)</label><input id="fp_monto" type="number" placeholder="0.00"></div>
-        <div class="form-group"><label>Periodicidad</label>
-          <select id="fp_periodo"><option value="anual">Anual</option><option value="semestral">Semestral</option><option value="mensual">Mensual</option></select></div>
+        <div class="form-group"><label>Periodicidad</label><select id="fp_periodo"><option value="anual">Anual</option><option value="semestral">Semestral</option><option value="mensual">Mensual</option></select></div>
         <div class="form-group"><label>Fecha inicio</label><input id="fp_inicio" type="date"></div>
         <div class="form-group"><label>Fecha vencimiento</label><input id="fp_vence" type="date"></div>
-        <div class="form-group"><label>Estado</label>
-          <select id="fp_estado"><option value="activo">Activo</option><option value="por_vencer">Por vencer</option><option value="vencido">Vencido</option></select></div>
-        <div class="form-group full"><label>Notas</label><textarea id="fp_notas" placeholder="Observaciones de la póliza..."></textarea></div>
+        <div class="form-group"><label>Estado</label><select id="fp_estado"><option value="activo">Activo</option><option value="por_vencer">Por vencer</option><option value="vencido">Vencido</option></select></div>
+        <div class="form-group full"><label>Notas</label><textarea id="fp_notas" placeholder="Observaciones de la poliza..."></textarea></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="cerrarModal('formPolizaModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarPoliza()">Guardar póliza</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="cerrarModal('formPolizaModal')">Cancelar</button><button class="btn btn-primary" onclick="guardarPoliza()">Guardar poliza</button></div>
   </div>
 </div>
 
-<!-- MODAL FORM TAREA -->
 <div class="modal-overlay" id="formTareaModal" onclick="if(event.target===this)cerrarModal('formTareaModal')">
   <div class="modal" style="max-width:480px">
-    <div class="modal-header">
-      <div class="modal-title">Nueva tarea</div>
-      <button class="btn btn-outline btn-icon btn-sm" onclick="cerrarModal('formTareaModal')">✕</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Nueva tarea</div><button class="btn btn-outline btn-icon btn-sm" onclick="cerrarModal('formTareaModal')">X</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="form-group full"><label>Tarea *</label><input id="ft_tarea" type="text" placeholder="Ej: Llamar para renovación de póliza"></div>
-        <div class="form-group"><label>Cliente</label>
-          <select id="ft_cliente"><option value="">Sin cliente específico</option></select></div>
-        <div class="form-group"><label>Tipo</label>
-          <select id="ft_tipo"><option value="renovacion">Renovación</option><option value="cobro">Cobro</option><option value="cotizacion">Cotización</option><option value="entrega">Entrega</option><option value="revision">Revisión</option></select></div>
+        <div class="form-group full"><label>Tarea *</label><input id="ft_tarea" type="text" placeholder="Ej: Llamar para renovacion de poliza"></div>
+        <div class="form-group"><label>Cliente</label><select id="ft_cliente"><option value="">Sin cliente especifico</option></select></div>
+        <div class="form-group"><label>Tipo</label><select id="ft_tipo"><option value="renovacion">Renovacion</option><option value="cobro">Cobro</option><option value="cotizacion">Cotizacion</option><option value="entrega">Entrega</option><option value="revision">Revision</option></select></div>
         <div class="form-group"><label>Fecha y hora</label><input id="ft_fecha" type="datetime-local"></div>
-        <div class="form-group"><label>Prioridad</label>
-          <select id="ft_prioridad"><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div>
+        <div class="form-group"><label>Prioridad</label><select id="ft_prioridad"><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div>
         <div class="form-group full"><label>Notas</label><textarea id="ft_notas" placeholder="Detalles adicionales..."></textarea></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="cerrarModal('formTareaModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarTarea()">Guardar tarea</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="cerrarModal('formTareaModal')">Cancelar</button><button class="btn btn-primary" onclick="guardarTarea()">Guardar tarea</button></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ─── SUPABASE CONFIG ───────────────────────────────────────
-const SUPABASE_URL = 'https://lwkwkkzkaukgnejdddll.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3a3dra3prYXVrZ25lamRkZGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjM3MDEsImV4cCI6MjA5NDI5OTcwMX0.1VDxs7AoVLs8GOoe5tGw3NO29CCifog2Od08nhHiGao';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+// ─── GOOGLE DRIVE CONFIG ──────────────────────────────────
+const DRIVE_CLIENT_ID='1015959485065-ujr6ttrrf5nc6vteho2c4n6j725466m8.apps.googleusercontent.com';
+const DRIVE_FOLDER_ROOT='1rHExbEfswmC3TrIp89ACXT_ZMtmihxmY';
+const DRIVE_SCOPES='https://www.googleapis.com/auth/drive.file';
+let driveToken=null;
 
-// ─── COLORES ASEGURADORAS ──────────────────────────────────
-const ASEG_COLORS = {
-  GNP:'#0f6e56', CHUBB:'#005b8e', AXA:'#dc2626',
-  Qualitas:'#c8973a', HDI:'#e30613', MAPFRE:'#003da5', Banorte:'#8b0000'
-};
-
-// ─── ESTADO GLOBAL ──────────────────────────────────────────
-let allClientes = [];
-let allPolizas = [];
-let allAgenda = [];
-let currentClienteId = null;
-let currentAsegFilter = null;
-let currentAgendaFiltro = 'todo';
-let formClienteEditId = null;
-let formPolizaClienteId = null;
-
-// ─── NAVEGACIÓN ─────────────────────────────────────────────
-function showSection(id, el) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('sec-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (el) el.classList.add('active');
-  const titles = {inicio:'Panel Principal',aseguradoras:'Aseguradoras',clientes:'Clientes y Pólizas',agenda:'Agenda',exportar:'Exportar'};
-  document.getElementById('pageTitle').textContent = titles[id] || '';
-  if (id === 'inicio') cargarInicio();
-  if (id === 'aseguradoras') cargarAseguradoras();
-  if (id === 'clientes') renderClientes();
-  if (id === 'agenda') renderAgenda();
+async function iniciarDrive(){
+  return new Promise((resolve,reject)=>{
+    if(driveToken){resolve(driveToken);return;}
+    const client=google.accounts.oauth2.initTokenClient({
+      client_id:DRIVE_CLIENT_ID,
+      scope:DRIVE_SCOPES,
+      callback:(resp)=>{
+        if(resp.error){reject(resp.error);return;}
+        driveToken=resp.access_token;
+        resolve(driveToken);
+      }
+    });
+    client.requestAccessToken();
+  });
 }
 
-// ─── UTILS ──────────────────────────────────────────────────
-function toast(msg, type='') {
-  const t = document.createElement('div');
-  t.className = 'toast-item ' + type;
-  t.textContent = msg;
+async function crearCarpetaCliente(nombreCliente){
+  try{
+    const token=await iniciarDrive();
+    // Verificar si ya existe
+    const buscar=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${nombreCliente}' and '${DRIVE_FOLDER_ROOT}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,{headers:{Authorization:`Bearer ${token}`}});
+    const res=await buscar.json();
+    if(res.files&&res.files.length>0)return res.files[0].id;
+    // Crear nueva carpeta
+    const crear=await fetch('https://www.googleapis.com/drive/v3/files',{
+      method:'POST',
+      headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({name:nombreCliente,mimeType:'application/vnd.google-apps.folder',parents:[DRIVE_FOLDER_ROOT]})
+    });
+    const carpeta=await crear.json();
+    return carpeta.id;
+  }catch(e){
+    console.error('Error Drive:',e);
+    return null;
+  }
+}
+
+async function listarDocumentosCliente(folderId){
+  try{
+    const token=await iniciarDrive();
+    const res=await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false&fields=files(id,name,mimeType,webViewLink,createdTime)`,{headers:{Authorization:`Bearer ${token}`}});
+    const data=await res.json();
+    return data.files||[];
+  }catch(e){return[];}
+}
+
+async function subirArchivoDrive(file,folderId){
+  try{
+    const token=await iniciarDrive();
+    const metadata={name:file.name,parents:[folderId]};
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+    form.append('file',file);
+    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:`Bearer ${token}`},body:form});
+    return await res.json();
+  }catch(e){return null;}
+}
+
+const SUPABASE_URL='https://lwkwkkzkaukgnejdddll.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3a3dra3prYXVrZ25lamRkZGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MjM3MDEsImV4cCI6MjA5NDI5OTcwMX0.1VDxs7AoVLs8GOoe5tGw3NO29CCifog2Od08nhHiGao';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+const ASEG_COLORS={GNP:'#0f6e56',CHUBB:'#005b8e',AXA:'#dc2626',Qualitas:'#c8973a',HDI:'#e30613',MAPFRE:'#003da5',Banorte:'#8b0000'};
+let allClientes=[],allPolizas=[],allAgenda=[],currentClienteId=null,currentAsegFilter=null,currentAgendaFiltro='todo',formClienteEditId=null,formPolizaClienteId=null;
+
+function hacerLogin(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginError');
+  err.style.display='none';
+  if(email==='agente.gsgseguros@gmail.com'&&pass==='GSGSeguros2025'){
+    sessionStorage.setItem('gsg_ok','1');
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appWrap').style.display='flex';
+    cargarDatos();
+  }else{
+    err.style.display='block';
+  }
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  if(sessionStorage.getItem('gsg_ok')){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appWrap').style.display='flex';
+    cargarDatos();
+  }
+});
+
+function showSection(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const titles={inicio:'Panel Principal',aseguradoras:'Aseguradoras',clientes:'Clientes y Polizas',agenda:'Agenda',exportar:'Exportar'};
+  document.getElementById('pageTitle').textContent=titles[id]||'';
+  if(id==='inicio')cargarInicio();
+  if(id==='aseguradoras')cargarAseguradoras();
+  if(id==='clientes')renderClientes();
+  if(id==='agenda')renderAgenda();
+}
+
+function toast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast-item '+type;
+  t.textContent=msg;
   document.getElementById('toast').appendChild(t);
-  setTimeout(() => t.remove(), 3000);
+  setTimeout(()=>t.remove(),3000);
 }
 
-function initials(nombre) {
-  const p = nombre.trim().split(' ');
-  return (p[0]?.[0] || '') + (p[1]?.[0] || '');
+function initials(n){const p=n.trim().split(' ');return(p[0]?.[0]||'')+(p[1]?.[0]||'');}
+
+function avatarColor(n){
+  const colors=[{bg:'#dbeafe',tc:'#1e40af'},{bg:'#dcfce7',tc:'#166534'},{bg:'#fef3c7',tc:'#92400e'},{bg:'#ede9fe',tc:'#5b21b6'},{bg:'#fce7f3',tc:'#9d174d'},{bg:'#d1fae5',tc:'#065f46'},{bg:'#e0e7ff',tc:'#3730a3'},{bg:'#fff7ed',tc:'#9a3412'}];
+  let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))&0xffff;
+  return colors[h%colors.length];
 }
 
-function avatarColor(nombre) {
-  const colors = [
-    {bg:'#dbeafe',tc:'#1e40af'},{bg:'#dcfce7',tc:'#166534'},
-    {bg:'#fef3c7',tc:'#92400e'},{bg:'#ede9fe',tc:'#5b21b6'},
-    {bg:'#fce7f3',tc:'#9d174d'},{bg:'#d1fae5',tc:'#065f46'},
-    {bg:'#e0e7ff',tc:'#3730a3'},{bg:'#fff7ed',tc:'#9a3412'},
-  ];
-  let h = 0;
-  for (let c of nombre) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-  return colors[h % colors.length];
-}
-
-function estadoBadge(e) {
-  if (e === 'activo') return '<span class="badge badge-green">Activo</span>';
-  if (e === 'por_vencer') return '<span class="badge badge-amber">Por vencer</span>';
+function estadoBadge(e){
+  if(e==='activo')return '<span class="badge badge-green">Activo</span>';
+  if(e==='por_vencer')return '<span class="badge badge-amber">Por vencer</span>';
   return '<span class="badge badge-red">Vencido</span>';
 }
 
-function diasRestantes(fechaStr) {
-  const hoy = new Date(); hoy.setHours(0,0,0,0);
-  const f = new Date(fechaStr + 'T00:00:00');
-  return Math.round((f - hoy) / 86400000);
+function diasRestantes(f){
+  const hoy=new Date();hoy.setHours(0,0,0,0);
+  return Math.round((new Date(f+'T00:00:00')-hoy)/86400000);
 }
 
-function formatFecha(d) {
-  if (!d) return '—';
-  const f = new Date(d + 'T00:00:00');
-  return f.toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'});
+function formatFecha(d){
+  if(!d)return '--';
+  return new Date(d+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
 }
 
-function formatMoney(n) {
-  if (!n) return '$0';
-  return '$' + Number(n).toLocaleString('es-MX');
+function formatMoney(n){
+  if(!n)return '$0';
+  return '$'+Number(n).toLocaleString('es-MX');
 }
 
-function cerrarModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
+function cerrarModal(id){document.getElementById(id).classList.remove('open');}
 
-// ─── CARGA INICIAL ───────────────────────────────────────────
-async function cargarDatos() {
-  const [rc, rp, ra] = await Promise.all([
+async function cargarDatos(){
+  const[rc,rp,ra]=await Promise.all([
     db.from('clientes').select('*').order('nombre_completo'),
     db.from('polizas').select('*').order('fecha_vencimiento'),
     db.from('agenda').select('*').order('fecha')
   ]);
-  allClientes = rc.data || [];
-  allPolizas  = rp.data || [];
-  allAgenda   = ra.data || [];
-  poblarSelectClientes();
-  cargarInicio();
+  allClientes=rc.data||[];allPolizas=rp.data||[];allAgenda=ra.data||[];
+  poblarSelectClientes();cargarInicio();
 }
 
-// ─── INICIO ─────────────────────────────────────────────────
-async function cargarInicio() {
-  const hoy = new Date(); hoy.setHours(0,0,0,0);
-  const en30 = new Date(hoy); en30.setDate(en30.getDate() + 30);
-
-  const activas = allPolizas.filter(p => p.estado !== 'vencido');
-  const porVencer = allPolizas.filter(p => {
-    if (!p.fecha_vencimiento) return false;
-    const d = diasRestantes(p.fecha_vencimiento);
-    return d >= 0 && d <= 30;
-  });
-  const vencidas = allPolizas.filter(p => p.estado === 'vencido');
-  const primaTotal = activas.reduce((s,p) => s + (Number(p.prima_monto) || 0), 0);
-
-  document.getElementById('kpiClientes').textContent = allClientes.length;
-  document.getElementById('kpiPorVencer').textContent = porVencer.length;
-  document.getElementById('kpiVencidas').textContent = vencidas.length;
-  document.getElementById('kpiPrima').textContent = formatMoney(primaTotal);
-
-  // Gráfica por aseguradora
-  const porAseg = {};
-  activas.forEach(p => {
-    const a = p.aseguradora || 'Otro';
-    porAseg[a] = (porAseg[a] || 0) + Number(p.prima_monto || 0);
-  });
-  const asegKeys = Object.keys(porAseg).sort((a,b) => porAseg[b] - porAseg[a]);
-  const maxVal = Math.max(...Object.values(porAseg), 1);
-  document.getElementById('chartWrap').innerHTML = asegKeys.map(a => {
-    const h = Math.max(8, Math.round((porAseg[a] / maxVal) * 140));
-    const k = porAseg[a] >= 1000 ? '$' + Math.round(porAseg[a]/1000) + 'k' : formatMoney(porAseg[a]);
-    return `<div class="bar-group">
-      <div class="bar-val">${k}</div>
-      <div class="bar" style="height:${h}px;background:${ASEG_COLORS[a]||'var(--navy)'}"></div>
-      <div class="bar-label">${a}</div>
-    </div>`;
-  }).join('') || '<div class="empty">Sin datos</div>';
-
-  // Próximas a vencer
-  const prox = [...porVencer].sort((a,b) => new Date(a.fecha_vencimiento) - new Date(b.fecha_vencimiento)).slice(0,5);
-  if (prox.length === 0) {
-    document.getElementById('proximasTable').innerHTML = '<div class="empty">No hay pólizas por vencer en 30 días 🎉</div>';
-  } else {
-    document.getElementById('proximasTable').innerHTML = `<table>
-      <thead><tr><th>Cliente</th><th>Aseguradora</th><th>Vencimiento</th><th>Días</th></tr></thead>
-      <tbody>${prox.map(p => {
-        const c = allClientes.find(x => x.id === p.cliente_id);
-        const dias = diasRestantes(p.fecha_vencimiento);
-        const cls = dias <= 7 ? 'badge-red' : 'badge-amber';
-        return `<tr onclick="abrirFicha('${p.cliente_id}')" style="cursor:pointer">
-          <td>${c ? c.nombre_completo : '—'}</td>
-          <td><span style="color:${ASEG_COLORS[p.aseguradora]||'#374151'};font-weight:700">${p.aseguradora}</span></td>
-          <td>${formatFecha(p.fecha_vencimiento)}</td>
-          <td><span class="badge ${cls}">${dias} días</span></td>
-        </tr>`;
-      }).join('')}</tbody></table>`;
-  }
-
-  // Actividad reciente (últimos clientes y pólizas)
-  const recientes = [
-    ...allClientes.slice(-3).map(c => ({tipo:'cliente', texto:`Cliente registrado: ${c.nombre_completo}`, ts: c.created_at, icon:'👤', bg:'#dcfce7'})),
-    ...allPolizas.slice(-3).map(p => {
-      const c = allClientes.find(x => x.id === p.cliente_id);
-      return {tipo:'poliza', texto:`Póliza ${p.aseguradora} – ${c?.nombre_completo || ''}`, ts: p.created_at, icon:'📋', bg:'#dbeafe'};
-    })
-  ].sort((a,b) => new Date(b.ts) - new Date(a.ts)).slice(0,6);
-
-  document.getElementById('activityList').innerHTML = recientes.length
-    ? recientes.map(r => `<li>
-        <div class="act-icon" style="background:${r.bg}">${r.icon}</div>
-        <div>${r.texto}</div>
-        <div class="act-time">${new Date(r.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short'})}</div>
-      </li>`).join('')
-    : '<li><div class="empty">Sin actividad reciente</div></li>';
+async function cargarInicio(){
+  const activas=allPolizas.filter(p=>p.estado!=='vencido');
+  const porVencer=allPolizas.filter(p=>{if(!p.fecha_vencimiento)return false;const d=diasRestantes(p.fecha_vencimiento);return d>=0&&d<=30;});
+  const vencidas=allPolizas.filter(p=>p.estado==='vencido');
+  const primaTotal=activas.reduce((s,p)=>s+(Number(p.prima_monto)||0),0);
+  document.getElementById('kpiClientes').textContent=allClientes.length;
+  document.getElementById('kpiPorVencer').textContent=porVencer.length;
+  document.getElementById('kpiVencidas').textContent=vencidas.length;
+  document.getElementById('kpiPrima').textContent=formatMoney(primaTotal);
+  const porAseg={};
+  activas.forEach(p=>{const a=p.aseguradora||'Otro';porAseg[a]=(porAseg[a]||0)+Number(p.prima_monto||0);});
+  const asegKeys=Object.keys(porAseg).sort((a,b)=>porAseg[b]-porAseg[a]);
+  const maxVal=Math.max(...Object.values(porAseg),1);
+  document.getElementById('chartWrap').innerHTML=asegKeys.map(a=>{
+    const h=Math.max(8,Math.round((porAseg[a]/maxVal)*140));
+    const k=porAseg[a]>=1000?'$'+Math.round(porAseg[a]/1000)+'k':formatMoney(porAseg[a]);
+    return `<div class="bar-group"><div class="bar-val">${k}</div><div class="bar" style="height:${h}px;background:${ASEG_COLORS[a]||'var(--navy)'}"></div><div class="bar-label">${a}</div></div>`;
+  }).join('')||'<div class="empty">Sin datos</div>';
+  const prox=[...porVencer].sort((a,b)=>new Date(a.fecha_vencimiento)-new Date(b.fecha_vencimiento)).slice(0,5);
+  document.getElementById('proximasTable').innerHTML=prox.length
+    ?`<table><thead><tr><th>Cliente</th><th>Aseguradora</th><th>Vencimiento</th><th>Dias</th></tr></thead><tbody>${prox.map(p=>{const c=allClientes.find(x=>x.id===p.cliente_id);const dias=diasRestantes(p.fecha_vencimiento);return`<tr onclick="abrirFicha('${p.cliente_id}')" style="cursor:pointer"><td>${c?c.nombre_completo:'--'}</td><td><span style="color:${ASEG_COLORS[p.aseguradora]||'#374151'};font-weight:700">${p.aseguradora}</span></td><td>${formatFecha(p.fecha_vencimiento)}</td><td><span class="badge ${dias<=7?'badge-red':'badge-amber'}">${dias} dias</span></td></tr>`;}).join('')}</tbody></table>`
+    :'<div class="empty">No hay polizas por vencer en 30 dias</div>';
+  const recientes=[
+    ...allClientes.slice(-3).map(c=>({texto:`Cliente registrado: ${c.nombre_completo}`,ts:c.created_at,icon:'👤',bg:'#dcfce7'})),
+    ...allPolizas.slice(-3).map(p=>{const c=allClientes.find(x=>x.id===p.cliente_id);return{texto:`Poliza ${p.aseguradora} - ${c?.nombre_completo||''}`,ts:p.created_at,icon:'📋',bg:'#dbeafe'};})
+  ].sort((a,b)=>new Date(b.ts)-new Date(a.ts)).slice(0,6);
+  document.getElementById('activityList').innerHTML=recientes.length
+    ?recientes.map(r=>`<li><div class="act-icon" style="background:${r.bg}">${r.icon}</div><div>${r.texto}</div><div class="act-time">${new Date(r.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short'})}</div></li>`).join('')
+    :'<li><div class="empty">Sin actividad reciente</div></li>';
 }
 
-// ─── ASEGURADORAS ────────────────────────────────────────────
-function cargarAseguradoras() {
-  const stats = {};
-  Object.keys(ASEG_COLORS).forEach(a => stats[a] = {clientes:new Set(), polizas:0, prima:0});
-
-  allPolizas.forEach(p => {
-    const a = p.aseguradora;
-    if (stats[a]) {
-      if (p.cliente_id) stats[a].clientes.add(p.cliente_id);
-      stats[a].polizas++;
-      stats[a].prima += Number(p.prima_monto || 0);
-    }
-  });
-
-  document.getElementById('asegGrid').innerHTML = Object.entries(ASEG_COLORS).map(([nombre, color]) => {
-    const s = stats[nombre];
-    const sel = currentAsegFilter === nombre ? 'sel' : '';
-    return `<div class="aseg-card ${sel}" style="border-top-color:${color}" onclick="filtrarAseg('${nombre}')">
-      <div class="aseg-name" style="color:${color}">${nombre}</div>
-      <div class="aseg-row">
-        <div><div class="aseg-stat-val">${s.clientes.size}</div><div class="aseg-stat-lbl">Clientes</div></div>
-        <div><div class="aseg-stat-val">${s.polizas}</div><div class="aseg-stat-lbl">Pólizas</div></div>
-      </div>
-      <div style="margin-top:8px;font-weight:700;color:${color};font-size:13px">${formatMoney(s.prima)} <span style="color:var(--text-muted);font-weight:400;font-size:11px">prima total</span></div>
-    </div>`;
+function cargarAseguradoras(){
+  const stats={};
+  Object.keys(ASEG_COLORS).forEach(a=>stats[a]={clientes:new Set(),polizas:0,prima:0});
+  allPolizas.forEach(p=>{const a=p.aseguradora;if(stats[a]){if(p.cliente_id)stats[a].clientes.add(p.cliente_id);stats[a].polizas++;stats[a].prima+=Number(p.prima_monto||0);}});
+  document.getElementById('asegGrid').innerHTML=Object.entries(ASEG_COLORS).map(([nombre,color])=>{
+    const s=stats[nombre];const sel=currentAsegFilter===nombre?'sel':'';
+    return`<div class="aseg-card ${sel}" style="border-top-color:${color}" onclick="filtrarAseg('${nombre}')"><div class="aseg-name" style="color:${color}">${nombre}</div><div class="aseg-row"><div><div class="aseg-stat-val">${s.clientes.size}</div><div class="aseg-stat-lbl">Clientes</div></div><div><div class="aseg-stat-val">${s.polizas}</div><div class="aseg-stat-lbl">Polizas</div></div></div><div style="margin-top:8px;font-weight:700;color:${color};font-size:13px">${formatMoney(s.prima)} <span style="color:var(--text-muted);font-weight:400;font-size:11px">prima total</span></div></div>`;
   }).join('');
   renderAsegTable();
 }
 
-function filtrarAseg(nombre) {
-  currentAsegFilter = currentAsegFilter === nombre ? null : nombre;
-  cargarAseguradoras();
-}
+function filtrarAseg(n){currentAsegFilter=currentAsegFilter===n?null:n;cargarAseguradoras();}
 
-function renderAsegTable() {
-  const rows = [];
-  allPolizas.forEach(p => {
-    if (currentAsegFilter && p.aseguradora !== currentAsegFilter) return;
-    const c = allClientes.find(x => x.id === p.cliente_id);
-    if (!c) return;
-    const av = avatarColor(c.nombre_completo);
-    rows.push(`<tr onclick="abrirFicha('${c.id}')" style="cursor:pointer">
-      <td><div class="flex items-center gap-8"><div class="avatar" style="background:${av.bg};color:${av.tc}">${initials(c.nombre_completo)}</div>${c.nombre_completo}</div></td>
-      <td><span style="color:${ASEG_COLORS[p.aseguradora]||'#374151'};font-weight:700">${p.aseguradora}</span></td>
-      <td>${p.tipo_seguro||'—'}</td>
-      <td style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace">${p.numero_poliza||'—'}</td>
-      <td>${formatMoney(p.prima_monto)}</td>
-      <td>${formatFecha(p.fecha_vencimiento)}</td>
-      <td>${estadoBadge(p.estado)}</td>
-    </tr>`);
+function renderAsegTable(){
+  const rows=[];
+  allPolizas.forEach(p=>{
+    if(currentAsegFilter&&p.aseguradora!==currentAsegFilter)return;
+    const c=allClientes.find(x=>x.id===p.cliente_id);if(!c)return;
+    const av=avatarColor(c.nombre_completo);
+    rows.push(`<tr onclick="abrirFicha('${c.id}')" style="cursor:pointer"><td><div class="flex items-center gap-8"><div class="avatar" style="background:${av.bg};color:${av.tc}">${initials(c.nombre_completo)}</div>${c.nombre_completo}</div></td><td><span style="color:${ASEG_COLORS[p.aseguradora]||'#374151'};font-weight:700">${p.aseguradora}</span></td><td>${p.tipo_seguro||'--'}</td><td style="font-size:11px;color:var(--text-muted)">${p.numero_poliza||'--'}</td><td>${formatMoney(p.prima_monto)}</td><td>${formatFecha(p.fecha_vencimiento)}</td><td>${estadoBadge(p.estado)}</td></tr>`);
   });
-  document.getElementById('asegTableBody').innerHTML = rows.join('') || '<tr><td colspan="7"><div class="empty">Sin pólizas</div></td></tr>';
-  document.getElementById('asegTableTitle').textContent = currentAsegFilter ? `Pólizas — ${currentAsegFilter}` : 'Todas las pólizas';
+  document.getElementById('asegTableBody').innerHTML=rows.join('')||'<tr><td colspan="7"><div class="empty">Sin polizas</div></td></tr>';
+  document.getElementById('asegTableTitle').textContent=currentAsegFilter?`Polizas - ${currentAsegFilter}`:'Todas las polizas';
 }
 
-// ─── CLIENTES ────────────────────────────────────────────────
-function renderClientes(lista) {
-  const data = lista !== undefined ? lista : allClientes;
-  const body = document.getElementById('clientesBody');
-  if (!data.length) { body.innerHTML = '<tr><td colspan="7"><div class="empty">No se encontraron clientes</div></td></tr>'; return; }
-
-  body.innerHTML = data.map(c => {
-    const polizas = allPolizas.filter(p => p.cliente_id === c.id);
-    const aseguradoras = [...new Set(polizas.map(p => p.aseguradora))];
-    const prima = polizas.reduce((s,p) => s + Number(p.prima_monto||0), 0);
-    const av = avatarColor(c.nombre_completo);
-    return `<tr onclick="abrirFicha('${c.id}')">
-      <td><div class="flex items-center gap-8">
-        <div class="avatar" style="background:${av.bg};color:${av.tc}">${initials(c.nombre_completo)}</div>
-        <div><div style="font-weight:600">${c.nombre_completo}</div><div class="text-sm text-muted">${c.tipo==='empresa'?'Empresa':'Persona física'}</div></div>
-      </div></td>
-      <td style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace">${c.rfc||'—'}</td>
-      <td>${c.telefono||'—'}</td>
-      <td><span class="badge badge-blue">${polizas.length} póliza${polizas.length!==1?'s':''}</span></td>
-      <td>${aseguradoras.map(a=>`<span style="color:${ASEG_COLORS[a]||'#374151'};font-weight:700;font-size:11px;margin-right:4px">${a}</span>`).join('')||'—'}</td>
-      <td style="font-weight:700">${formatMoney(prima)}</td>
-      <td><button class="btn btn-outline btn-sm btn-icon" onclick="event.stopPropagation();abrirFicha('${c.id}')">👁</button></td>
-    </tr>`;
+function renderClientes(lista){
+  const data=lista!==undefined?lista:allClientes;
+  const body=document.getElementById('clientesBody');
+  if(!data.length){body.innerHTML='<tr><td colspan="7"><div class="empty">No se encontraron clientes</div></td></tr>';return;}
+  body.innerHTML=data.map(c=>{
+    const polizas=allPolizas.filter(p=>p.cliente_id===c.id);
+    const aseguradoras=[...new Set(polizas.map(p=>p.aseguradora))];
+    const prima=polizas.reduce((s,p)=>s+Number(p.prima_monto||0),0);
+    const av=avatarColor(c.nombre_completo);
+    return`<tr onclick="abrirFicha('${c.id}')"><td><div class="flex items-center gap-8"><div class="avatar" style="background:${av.bg};color:${av.tc}">${initials(c.nombre_completo)}</div><div><div style="font-weight:600">${c.nombre_completo}</div><div class="text-sm text-muted">${c.tipo==='empresa'?'Empresa':'Persona fisica'}</div></div></div></td><td style="font-size:11px;color:var(--text-muted)">${c.rfc||'--'}</td><td>${c.telefono||'--'}</td><td><span class="badge badge-blue">${polizas.length} poliza${polizas.length!==1?'s':''}</span></td><td>${aseguradoras.map(a=>`<span style="color:${ASEG_COLORS[a]||'#374151'};font-weight:700;font-size:11px;margin-right:4px">${a}</span>`).join('')||'--'}</td><td style="font-weight:700">${formatMoney(prima)}</td><td><button class="btn btn-outline btn-sm btn-icon" onclick="event.stopPropagation();abrirFicha('${c.id}')">👁</button></td></tr>`;
   }).join('');
 }
 
-function filtrarClientes() {
-  const q = document.getElementById('clienteSearch').value.toLowerCase();
-  const aseg = document.getElementById('filterAseg').value;
-  const est = document.getElementById('filterEstado').value;
-  const res = allClientes.filter(c => {
-    const matchQ = !q || c.nombre_completo.toLowerCase().includes(q) || (c.rfc||'').toLowerCase().includes(q);
-    const polizas = allPolizas.filter(p => p.cliente_id === c.id);
-    const matchA = !aseg || polizas.some(p => p.aseguradora === aseg);
-    const matchE = !est || polizas.some(p => p.estado === est);
-    return matchQ && matchA && matchE;
-  });
-  renderClientes(res);
+function filtrarClientes(){
+  const q=document.getElementById('clienteSearch').value.toLowerCase();
+  const aseg=document.getElementById('filterAseg').value;
+  const est=document.getElementById('filterEstado').value;
+  renderClientes(allClientes.filter(c=>{
+    const matchQ=!q||c.nombre_completo.toLowerCase().includes(q)||(c.rfc||'').toLowerCase().includes(q);
+    const polizas=allPolizas.filter(p=>p.cliente_id===c.id);
+    return matchQ&&(!aseg||polizas.some(p=>p.aseguradora===aseg))&&(!est||polizas.some(p=>p.estado===est));
+  }));
 }
 
-// ─── FICHA CLIENTE ───────────────────────────────────────────
-function abrirFicha(clienteId) {
-  const c = allClientes.find(x => x.id === clienteId);
-  if (!c) return;
-  currentClienteId = clienteId;
-  const av = avatarColor(c.nombre_completo);
-  const el = document.getElementById('fichaAvatar');
-  el.textContent = initials(c.nombre_completo);
-  el.style.background = av.bg; el.style.color = av.tc;
-  el.style.width='40px'; el.style.height='40px'; el.style.fontSize='14px';
-  document.getElementById('fichaNombre').textContent = c.nombre_completo;
-  document.getElementById('fichaRFC').textContent = `RFC: ${c.rfc||'—'} · ${c.tipo==='empresa'?'Empresa':'Persona física'}`;
-  document.getElementById('fichaInfo').innerHTML = [
-    ['Teléfono', c.telefono],['Correo', c.correo],
-    ['Dirección', c.direccion],['Código postal', c.codigo_postal],
-    ['Fecha nacimiento', formatFecha(c.fecha_nacimiento)],['Notas', c.notas||'—']
-  ].map(([l,v])=>`<div class="info-item"><label>${l}</label><p>${v||'—'}</p></div>`).join('');
-
-  const polizas = allPolizas.filter(p => p.cliente_id === clienteId);
-  document.getElementById('fichaPolizas').innerHTML = polizas.length
-    ? polizas.map(p=>`<div class="poliza-item">
-        <div class="poliza-item-header">
-          <div class="poliza-item-name" style="color:${ASEG_COLORS[p.aseguradora]||'#374151'}">${p.aseguradora} — ${p.tipo_seguro||''}</div>
-          ${estadoBadge(p.estado)}
-        </div>
-        <div class="poliza-item-detail">
-          <div><span>Titular</span><b>${p.titular||'—'}</b></div>
-          <div><span>N° Póliza</span><b style="font-size:11px;font-family:'DM Mono',monospace">${p.numero_poliza||'—'}</b></div>
-          <div><span>Prima</span><b>${formatMoney(p.prima_monto)} / ${p.prima_periodicidad||'anual'}</b></div>
-          <div><span>Inicio</span><b>${formatFecha(p.fecha_inicio)}</b></div>
-          <div><span>Vencimiento</span><b>${formatFecha(p.fecha_vencimiento)}</b></div>
-          <div><span>Días restantes</span><b>${p.fecha_vencimiento ? diasRestantes(p.fecha_vencimiento)+' días' : '—'}</b></div>
-        </div>
-        <div style="margin-top:10px;display:flex;gap:6px">
-          <button class="btn btn-danger btn-sm" onclick="eliminarPoliza('${p.id}','${clienteId}')">🗑 Eliminar póliza</button>
-        </div>
-      </div>`).join('')
-    : '<div class="empty">Sin pólizas registradas</div>';
-
-  document.getElementById('btnEditarCliente').onclick = () => { cerrarModal('fichaModal'); abrirFormClienteEditar(c); };
-  document.getElementById('btnEliminarCliente').onclick = () => eliminarCliente(clienteId);
+function abrirFicha(clienteId){
+  const c=allClientes.find(x=>x.id===clienteId);if(!c)return;
+  currentClienteId=clienteId;
+  const av=avatarColor(c.nombre_completo);
+  const el=document.getElementById('fichaAvatar');
+  el.textContent=initials(c.nombre_completo);el.style.background=av.bg;el.style.color=av.tc;el.style.width='40px';el.style.height='40px';el.style.fontSize='14px';
+  document.getElementById('fichaNombre').textContent=c.nombre_completo;
+  document.getElementById('fichaRFC').textContent=`RFC: ${c.rfc||'--'} - ${c.tipo==='empresa'?'Empresa':'Persona fisica'}`;
+  document.getElementById('fichaInfo').innerHTML=[['Telefono',c.telefono],['Correo',c.correo],['Direccion',c.direccion],['Codigo postal',c.codigo_postal],['Fecha nacimiento',formatFecha(c.fecha_nacimiento)],['Notas',c.notas||'--']].map(([l,v])=>`<div class="info-item"><label>${l}</label><p>${v||'--'}</p></div>`).join('');
+  const polizas=allPolizas.filter(p=>p.cliente_id===clienteId);
+  document.getElementById('fichaPolizas').innerHTML=polizas.length
+    ?polizas.map(p=>`<div class="poliza-item"><div class="poliza-item-header"><div class="poliza-item-name" style="color:${ASEG_COLORS[p.aseguradora]||'#374151'}">${p.aseguradora} - ${p.tipo_seguro||''}</div>${estadoBadge(p.estado)}</div><div class="poliza-item-detail"><div><span>Titular</span><b>${p.titular||'--'}</b></div><div><span>N Poliza</span><b style="font-size:11px">${p.numero_poliza||'--'}</b></div><div><span>Prima</span><b>${formatMoney(p.prima_monto)} / ${p.prima_periodicidad||'anual'}</b></div><div><span>Inicio</span><b>${formatFecha(p.fecha_inicio)}</b></div><div><span>Vencimiento</span><b>${formatFecha(p.fecha_vencimiento)}</b></div><div><span>Dias restantes</span><b>${p.fecha_vencimiento?diasRestantes(p.fecha_vencimiento)+' dias':'--'}</b></div></div><div style="margin-top:10px"><button class="btn btn-danger btn-sm" onclick="eliminarPoliza('${p.id}','${clienteId}')">Eliminar poliza</button></div></div>`).join('')
+    :'<div class="empty">Sin polizas registradas</div>';
+  document.getElementById('btnEditarCliente').onclick=()=>{cerrarModal('fichaModal');abrirFormClienteEditar(c);};
+  document.getElementById('btnEliminarCliente').onclick=()=>eliminarCliente(clienteId);
   document.getElementById('fichaModal').classList.add('open');
 }
 
-// ─── FORM CLIENTE ────────────────────────────────────────────
-function abrirFormCliente() {
-  formClienteEditId = null;
-  document.getElementById('formClienteTitulo').textContent = 'Agregar cliente';
-  ['fc_nombre','fc_rfc','fc_tel','fc_correo','fc_dir','fc_cp','fc_notas'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('fc_tipo').value = 'persona_fisica';
-  document.getElementById('fc_nac').value = '';
+function abrirFormCliente(){
+  formClienteEditId=null;
+  document.getElementById('formClienteTitulo').textContent='Agregar cliente';
+  ['fc_nombre','fc_rfc','fc_tel','fc_correo','fc_dir','fc_cp','fc_notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fc_tipo').value='persona_fisica';document.getElementById('fc_nac').value='';
   document.getElementById('formClienteModal').classList.add('open');
 }
 
-function abrirFormClienteEditar(c) {
-  formClienteEditId = c.id;
-  document.getElementById('formClienteTitulo').textContent = 'Editar cliente';
-  document.getElementById('fc_nombre').value = c.nombre_completo||'';
-  document.getElementById('fc_tipo').value = c.tipo||'persona_fisica';
-  document.getElementById('fc_rfc').value = c.rfc||'';
-  document.getElementById('fc_tel').value = c.telefono||'';
-  document.getElementById('fc_correo').value = c.correo||'';
-  document.getElementById('fc_dir').value = c.direccion||'';
-  document.getElementById('fc_cp').value = c.codigo_postal||'';
-  document.getElementById('fc_nac').value = c.fecha_nacimiento||'';
-  document.getElementById('fc_notas').value = c.notas||'';
+function abrirFormClienteEditar(c){
+  formClienteEditId=c.id;
+  document.getElementById('formClienteTitulo').textContent='Editar cliente';
+  document.getElementById('fc_nombre').value=c.nombre_completo||'';document.getElementById('fc_tipo').value=c.tipo||'persona_fisica';
+  document.getElementById('fc_rfc').value=c.rfc||'';document.getElementById('fc_tel').value=c.telefono||'';
+  document.getElementById('fc_correo').value=c.correo||'';document.getElementById('fc_dir').value=c.direccion||'';
+  document.getElementById('fc_cp').value=c.codigo_postal||'';document.getElementById('fc_nac').value=c.fecha_nacimiento||'';
+  document.getElementById('fc_notas').value=c.notas||'';
   document.getElementById('formClienteModal').classList.add('open');
 }
 
-async function guardarCliente() {
-  const nombre = document.getElementById('fc_nombre').value.trim();
-  if (!nombre) { toast('El nombre es obligatorio', 'error'); return; }
-  const data = {
-    nombre_completo: nombre,
-    tipo: document.getElementById('fc_tipo').value,
-    rfc: document.getElementById('fc_rfc').value.trim().toUpperCase(),
-    telefono: document.getElementById('fc_tel').value.trim(),
-    correo: document.getElementById('fc_correo').value.trim(),
-    direccion: document.getElementById('fc_dir').value.trim(),
-    codigo_postal: document.getElementById('fc_cp').value.trim(),
-    fecha_nacimiento: document.getElementById('fc_nac').value || null,
-    notas: document.getElementById('fc_notas').value.trim(),
-  };
-  let res;
-  if (formClienteEditId) {
-    res = await db.from('clientes').update(data).eq('id', formClienteEditId);
-  } else {
-    res = await db.from('clientes').insert(data);
-  }
-  if (res.error) { toast('Error al guardar: ' + res.error.message, 'error'); return; }
-  toast(formClienteEditId ? 'Cliente actualizado ✓' : 'Cliente agregado ✓', 'success');
-  cerrarModal('formClienteModal');
-  await cargarDatos();
-  renderClientes();
+async function guardarCliente(){
+  const nombre=document.getElementById('fc_nombre').value.trim();
+  if(!nombre){toast('El nombre es obligatorio','error');return;}
+  const data={nombre_completo:nombre,tipo:document.getElementById('fc_tipo').value,rfc:document.getElementById('fc_rfc').value.trim().toUpperCase(),telefono:document.getElementById('fc_tel').value.trim(),correo:document.getElementById('fc_correo').value.trim(),direccion:document.getElementById('fc_dir').value.trim(),codigo_postal:document.getElementById('fc_cp').value.trim(),fecha_nacimiento:document.getElementById('fc_nac').value||null,notas:document.getElementById('fc_notas').value.trim()};
+  const res=formClienteEditId?await db.from('clientes').update(data).eq('id',formClienteEditId):await db.from('clientes').insert(data);
+  if(res.error){toast('Error al guardar: '+res.error.message,'error');return;}
+  toast(formClienteEditId?'Cliente actualizado':'Cliente agregado','success');
+  cerrarModal('formClienteModal');await cargarDatos();renderClientes();
 }
 
-async function eliminarCliente(id) {
-  if (!confirm('¿Eliminar este cliente y todas sus pólizas? Esta acción no se puede deshacer.')) return;
-  const res = await db.from('clientes').delete().eq('id', id);
-  if (res.error) { toast('Error al eliminar', 'error'); return; }
-  toast('Cliente eliminado', 'success');
-  cerrarModal('fichaModal');
-  await cargarDatos();
-  renderClientes();
+async function eliminarCliente(id){
+  if(!confirm('Eliminar este cliente y todas sus polizas?'))return;
+  const res=await db.from('clientes').delete().eq('id',id);
+  if(res.error){toast('Error al eliminar','error');return;}
+  toast('Cliente eliminado','success');cerrarModal('fichaModal');await cargarDatos();renderClientes();
 }
 
-// ─── FORM PÓLIZA ─────────────────────────────────────────────
-function abrirFormPoliza(clienteId) {
-  formPolizaClienteId = clienteId;
-  cerrarModal('fichaModal');
-  ['fp_tipo','fp_num','fp_titular','fp_notas'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('fp_aseg').value = '';
-  document.getElementById('fp_monto').value = '';
-  document.getElementById('fp_periodo').value = 'anual';
-  document.getElementById('fp_inicio').value = '';
-  document.getElementById('fp_vence').value = '';
-  document.getElementById('fp_estado').value = 'activo';
+function abrirFormPoliza(clienteId){
+  formPolizaClienteId=clienteId;cerrarModal('fichaModal');
+  ['fp_tipo','fp_num','fp_titular','fp_notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fp_aseg').value='';document.getElementById('fp_monto').value='';
+  document.getElementById('fp_periodo').value='anual';document.getElementById('fp_inicio').value='';
+  document.getElementById('fp_vence').value='';document.getElementById('fp_estado').value='activo';
   document.getElementById('formPolizaModal').classList.add('open');
 }
 
-async function guardarPoliza() {
-  const aseg = document.getElementById('fp_aseg').value;
-  const tipo = document.getElementById('fp_tipo').value.trim();
-  if (!aseg || !tipo) { toast('Aseguradora y tipo son obligatorios', 'error'); return; }
-  const data = {
-    cliente_id: formPolizaClienteId,
-    aseguradora: aseg,
-    tipo_seguro: tipo,
-    numero_poliza: document.getElementById('fp_num').value.trim(),
-    titular: document.getElementById('fp_titular').value.trim(),
-    prima_monto: Number(document.getElementById('fp_monto').value) || null,
-    prima_periodicidad: document.getElementById('fp_periodo').value,
-    fecha_inicio: document.getElementById('fp_inicio').value || null,
-    fecha_vencimiento: document.getElementById('fp_vence').value || null,
-    estado: document.getElementById('fp_estado').value,
-    notas: document.getElementById('fp_notas').value.trim(),
-  };
-  const res = await db.from('polizas').insert(data);
-  if (res.error) { toast('Error al guardar póliza: ' + res.error.message, 'error'); return; }
-  toast('Póliza agregada ✓', 'success');
-  cerrarModal('formPolizaModal');
-  await cargarDatos();
-  renderClientes();
-  abrirFicha(formPolizaClienteId);
+async function guardarPoliza(){
+  const aseg=document.getElementById('fp_aseg').value;const tipo=document.getElementById('fp_tipo').value.trim();
+  if(!aseg||!tipo){toast('Aseguradora y tipo son obligatorios','error');return;}
+  const data={cliente_id:formPolizaClienteId,aseguradora:aseg,tipo_seguro:tipo,numero_poliza:document.getElementById('fp_num').value.trim(),titular:document.getElementById('fp_titular').value.trim(),prima_monto:Number(document.getElementById('fp_monto').value)||null,prima_periodicidad:document.getElementById('fp_periodo').value,fecha_inicio:document.getElementById('fp_inicio').value||null,fecha_vencimiento:document.getElementById('fp_vence').value||null,estado:document.getElementById('fp_estado').value,notas:document.getElementById('fp_notas').value.trim()};
+  const res=await db.from('polizas').insert(data);
+  if(res.error){toast('Error al guardar poliza: '+res.error.message,'error');return;}
+  toast('Poliza agregada','success');cerrarModal('formPolizaModal');await cargarDatos();renderClientes();abrirFicha(formPolizaClienteId);
 }
 
-async function eliminarPoliza(polizaId, clienteId) {
-  if (!confirm('¿Eliminar esta póliza?')) return;
-  const res = await db.from('polizas').delete().eq('id', polizaId);
-  if (res.error) { toast('Error al eliminar póliza', 'error'); return; }
-  toast('Póliza eliminada', 'success');
-  await cargarDatos();
-  abrirFicha(clienteId);
+async function eliminarPoliza(polizaId,clienteId){
+  if(!confirm('Eliminar esta poliza?'))return;
+  const res=await db.from('polizas').delete().eq('id',polizaId);
+  if(res.error){toast('Error al eliminar poliza','error');return;}
+  toast('Poliza eliminada','success');await cargarDatos();abrirFicha(clienteId);
 }
 
-// ─── AGENDA ──────────────────────────────────────────────────
-function poblarSelectClientes() {
-  const opts = '<option value="">Sin cliente específico</option>' +
-    allClientes.map(c => `<option value="${c.id}">${c.nombre_completo}</option>`).join('');
-  document.getElementById('ft_cliente').innerHTML = opts;
+function poblarSelectClientes(){
+  document.getElementById('ft_cliente').innerHTML='<option value="">Sin cliente especifico</option>'+allClientes.map(c=>`<option value="${c.id}">${c.nombre_completo}</option>`).join('');
 }
 
-function filtrarAgenda(filtro, el) {
-  currentAgendaFiltro = filtro;
-  document.querySelectorAll('.agenda-tab').forEach(t => t.classList.remove('active'));
-  if (el) el.classList.add('active');
-  renderAgenda();
+function filtrarAgenda(filtro,el){
+  currentAgendaFiltro=filtro;
+  document.querySelectorAll('.agenda-tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');renderAgenda();
 }
 
-function renderAgenda() {
-  const hoy = new Date(); hoy.setHours(0,0,0,0);
-  const en7 = new Date(hoy); en7.setDate(en7.getDate() + 7);
-  const iconos = {renovacion:'🔄',cobro:'💰',cotizacion:'📋',entrega:'📦',revision:'🔍'};
-
-  let lista = [...allAgenda];
-  if (currentAgendaFiltro === 'hoy') lista = lista.filter(t => {
-    if (!t.fecha) return false;
-    const f = new Date(t.fecha); f.setHours(0,0,0,0);
-    return f.getTime() === hoy.getTime();
-  });
-  if (currentAgendaFiltro === 'semana') lista = lista.filter(t => {
-    if (!t.fecha) return false;
-    const f = new Date(t.fecha);
-    return f >= hoy && f <= en7;
-  });
-  if (currentAgendaFiltro === 'renovacion') lista = lista.filter(t => t.tipo === 'renovacion');
-  if (currentAgendaFiltro === 'cobro') lista = lista.filter(t => t.tipo === 'cobro');
-
-  const prioColor = {urgente:'var(--red)',alta:'var(--amber)',normal:'var(--text-muted)'};
-
-  document.getElementById('agendaList').innerHTML = lista.length
-    ? lista.map(t => {
-        const c = allClientes.find(x => x.id === t.cliente_id);
-        const fStr = t.fecha ? new Date(t.fecha).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
-        return `<div class="tarea-item${t.completada?' opacity-50':''}">
-          <div class="tarea-check${t.completada?' done':''}" onclick="toggleTarea('${t.id}',${!t.completada})">${t.completada?'✓':''}</div>
-          <div style="font-size:18px">${iconos[t.tipo]||'📌'}</div>
-          <div class="tarea-body">
-            <div class="tarea-titulo${t.completada?' text-muted':''}">${t.tarea}</div>
-            <div class="tarea-meta">
-              <span style="color:${prioColor[t.prioridad]||'var(--text-muted)'};font-weight:600">${t.prioridad}</span>
-              ${c?' · '+c.nombre_completo:''}  · ${fStr}
-            </div>
-          </div>
-          <div class="flex gap-8">
-            <button class="btn btn-outline btn-sm" onclick="abrirCalendar('${t.id}')" title="Agendar en Google Calendar">📅</button>
-            <button class="btn btn-danger btn-sm btn-icon" onclick="eliminarTarea('${t.id}')">🗑</button>
-          </div>
-        </div>`;
-      }).join('')
-    : '<div class="empty">No hay tareas en este filtro</div>';
+function renderAgenda(){
+  const hoy=new Date();hoy.setHours(0,0,0,0);
+  const en7=new Date(hoy);en7.setDate(en7.getDate()+7);
+  const iconos={renovacion:'🔄',cobro:'💰',cotizacion:'📋',entrega:'📦',revision:'🔍'};
+  let lista=[...allAgenda];
+  if(currentAgendaFiltro==='hoy')lista=lista.filter(t=>{if(!t.fecha)return false;const f=new Date(t.fecha);f.setHours(0,0,0,0);return f.getTime()===hoy.getTime();});
+  if(currentAgendaFiltro==='semana')lista=lista.filter(t=>{if(!t.fecha)return false;const f=new Date(t.fecha);return f>=hoy&&f<=en7;});
+  if(currentAgendaFiltro==='renovacion')lista=lista.filter(t=>t.tipo==='renovacion');
+  if(currentAgendaFiltro==='cobro')lista=lista.filter(t=>t.tipo==='cobro');
+  const prioColor={urgente:'var(--red)',alta:'var(--amber)',normal:'var(--text-muted)'};
+  document.getElementById('agendaList').innerHTML=lista.length
+    ?lista.map(t=>{const c=allClientes.find(x=>x.id===t.cliente_id);const fStr=t.fecha?new Date(t.fecha).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'--';return`<div class="tarea-item"><div class="tarea-check${t.completada?' done':''}" onclick="toggleTarea('${t.id}',${!t.completada})">${t.completada?'✓':''}</div><div style="font-size:18px">${iconos[t.tipo]||'📌'}</div><div class="tarea-body"><div class="tarea-titulo">${t.tarea}</div><div class="tarea-meta"><span style="color:${prioColor[t.prioridad]||'var(--text-muted)'};font-weight:600">${t.prioridad}</span>${c?' - '+c.nombre_completo:''} - ${fStr}</div></div><div class="flex gap-8"><button class="btn btn-outline btn-sm" onclick="abrirCalendar('${t.id}')">📅</button><button class="btn btn-danger btn-sm btn-icon" onclick="eliminarTarea('${t.id}')">🗑</button></div></div>`;}).join('')
+    :'<div class="empty">No hay tareas en este filtro</div>';
 }
 
-function abrirFormTarea() {
-  ['ft_tarea','ft_notas'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('ft_cliente').value = '';
-  document.getElementById('ft_tipo').value = 'renovacion';
-  document.getElementById('ft_prioridad').value = 'normal';
-  document.getElementById('ft_fecha').value = '';
+function abrirFormTarea(){
+  ['ft_tarea','ft_notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ft_cliente').value='';document.getElementById('ft_tipo').value='renovacion';
+  document.getElementById('ft_prioridad').value='normal';document.getElementById('ft_fecha').value='';
   document.getElementById('formTareaModal').classList.add('open');
 }
 
-function abrirFormTareaCliente(clienteId) {
-  abrirFormTarea();
-  cerrarModal('fichaModal');
-  setTimeout(() => document.getElementById('ft_cliente').value = clienteId, 100);
+function abrirFormTareaCliente(clienteId){abrirFormTarea();cerrarModal('fichaModal');setTimeout(()=>document.getElementById('ft_cliente').value=clienteId,100);}
+
+async function guardarTarea(){
+  const tarea=document.getElementById('ft_tarea').value.trim();
+  if(!tarea){toast('La tarea es obligatoria','error');return;}
+  const data={tarea,cliente_id:document.getElementById('ft_cliente').value||null,tipo:document.getElementById('ft_tipo').value,fecha:document.getElementById('ft_fecha').value||null,prioridad:document.getElementById('ft_prioridad').value,notas:document.getElementById('ft_notas').value.trim(),completada:false};
+  const res=await db.from('agenda').insert(data);
+  if(res.error){toast('Error al guardar tarea','error');return;}
+  toast('Tarea agregada','success');cerrarModal('formTareaModal');await cargarDatos();renderAgenda();
 }
 
-async function guardarTarea() {
-  const tarea = document.getElementById('ft_tarea').value.trim();
-  if (!tarea) { toast('La tarea es obligatoria', 'error'); return; }
-  const data = {
-    tarea,
-    cliente_id: document.getElementById('ft_cliente').value || null,
-    tipo: document.getElementById('ft_tipo').value,
-    fecha: document.getElementById('ft_fecha').value || null,
-    prioridad: document.getElementById('ft_prioridad').value,
-    notas: document.getElementById('ft_notas').value.trim(),
-    completada: false,
-  };
-  const res = await db.from('agenda').insert(data);
-  if (res.error) { toast('Error al guardar tarea', 'error'); return; }
-  toast('Tarea agregada ✓', 'success');
-  cerrarModal('formTareaModal');
-  await cargarDatos();
-  renderAgenda();
+async function toggleTarea(id,val){await db.from('agenda').update({completada:val}).eq('id',id);await cargarDatos();renderAgenda();}
+
+async function eliminarTarea(id){
+  if(!confirm('Eliminar esta tarea?'))return;
+  await db.from('agenda').delete().eq('id',id);
+  toast('Tarea eliminada','success');await cargarDatos();renderAgenda();
 }
 
-async function toggleTarea(id, val) {
-  await db.from('agenda').update({completada: val}).eq('id', id);
-  await cargarDatos();
-  renderAgenda();
+function abrirCalendar(id){
+  const t=allAgenda.find(a=>a.id===id);if(!t)return;
+  const c=allClientes.find(x=>x.id===t.cliente_id);
+  const titulo=encodeURIComponent((t.tarea||'')+(c?' - '+c.nombre_completo:''));
+  const notas=encodeURIComponent(`Cliente: ${c?.nombre_completo||'--'}\nAgente: Gabriel Solano Garcia / GSG Seguros\nTel: +52 33 3452 6503`);
+  window.open(`https://calendar.google.com/calendar/r/eventedit?text=${titulo}&details=${notas}`,'_blank');
 }
 
-async function eliminarTarea(id) {
-  if (!confirm('¿Eliminar esta tarea?')) return;
-  await db.from('agenda').delete().eq('id', id);
-  toast('Tarea eliminada', 'success');
-  await cargarDatos();
-  renderAgenda();
+async function exportarExcel(tipo){
+  let datos=[],nombre='',encabezados=[];
+  if(tipo==='todas'){nombre='GSG_Polizas_Todas';encabezados=['Cliente','RFC','Aseguradora','Tipo','N Poliza','Titular','Prima','Periodicidad','Inicio','Vencimiento','Estado'];datos=allPolizas.map(p=>{const c=allClientes.find(x=>x.id===p.cliente_id);return[c?.nombre_completo,c?.rfc,p.aseguradora,p.tipo_seguro,p.numero_poliza,p.titular,p.prima_monto,p.prima_periodicidad,p.fecha_inicio,p.fecha_vencimiento,p.estado];});}
+  else if(tipo==='por_vencer'){nombre='GSG_Polizas_Por_Vencer';encabezados=['Cliente','Telefono','Aseguradora','Tipo','N Poliza','Prima','Vencimiento','Dias restantes'];datos=allPolizas.filter(p=>{const d=diasRestantes(p.fecha_vencimiento);return d>=0&&d<=30;}).map(p=>{const c=allClientes.find(x=>x.id===p.cliente_id);return[c?.nombre_completo,c?.telefono,p.aseguradora,p.tipo_seguro,p.numero_poliza,p.prima_monto,p.fecha_vencimiento,diasRestantes(p.fecha_vencimiento)];});}
+  else if(tipo==='clientes'){nombre='GSG_Directorio_Clientes';encabezados=['Nombre','RFC','Tipo','Telefono','Correo','Direccion','CP','Polizas'];datos=allClientes.map(c=>{const pol=allPolizas.filter(p=>p.cliente_id===c.id).length;return[c.nombre_completo,c.rfc,c.tipo,c.telefono,c.correo,c.direccion,c.codigo_postal,pol];});}
+  else if(tipo==='aseguradora'){nombre='GSG_Reporte_Aseguradoras';encabezados=['Aseguradora','Clientes','Polizas','Prima Total'];const stats={};Object.keys(ASEG_COLORS).forEach(a=>stats[a]={clientes:new Set(),polizas:0,prima:0});allPolizas.forEach(p=>{if(stats[p.aseguradora]){if(p.cliente_id)stats[p.aseguradora].clientes.add(p.cliente_id);stats[p.aseguradora].polizas++;stats[p.aseguradora].prima+=Number(p.prima_monto||0);}});datos=Object.entries(stats).map(([a,s])=>[a,s.clientes.size,s.polizas,s.prima]);}
+  const ws=XLSX.utils.aoa_to_sheet([encabezados,...datos]);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Datos');
+  XLSX.writeFile(wb,nombre+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Archivo Excel descargado','success');
 }
 
-function abrirCalendar(id) {
-  const t = allAgenda.find(a => a.id === id);
-  if (!t) return;
-  const c = allClientes.find(x => x.id === t.cliente_id);
-  const titulo = encodeURIComponent((t.tarea||'') + (c?' – '+c.nombre_completo:''));
-  const notas = encodeURIComponent(`Cliente: ${c?.nombre_completo||'—'}\nAgente: Gabriel Solano García / GSG Seguros\nTel: +52 33 3452 6503`);
-  window.open(`https://calendar.google.com/calendar/r/eventedit?text=${titulo}&details=${notas}`, '_blank');
+// ─── GOOGLE DRIVE ─────────────────────────────────────────────
+const DRIVE_CLIENT_ID = '1015959485065-ujr6ttrrf5nc6vteho2c4n6j725466m8.apps.googleusercontent.com';
+const DRIVE_ROOT_FOLDER = '1rHExbEfswmC3TrIp89ACXT_ZMtmihxmY';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+let driveToken = null;
+
+function cargarGoogleAPI() {
+  return new Promise((resolve) => {
+    if (window.google && window.google.accounts) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = resolve;
+    document.head.appendChild(s);
+  });
 }
 
-// ─── EXPORTAR ────────────────────────────────────────────────
-async function exportarExcel(tipo) {
-  let datos = [], nombre = '', encabezados = [];
-
-  if (tipo === 'todas') {
-    nombre = 'GSG_Polizas_Todas';
-    encabezados = ['Cliente','RFC','Aseguradora','Tipo','N° Póliza','Titular','Prima','Periodicidad','Inicio','Vencimiento','Estado'];
-    datos = allPolizas.map(p => {
-      const c = allClientes.find(x => x.id === p.cliente_id);
-      return [c?.nombre_completo,c?.rfc,p.aseguradora,p.tipo_seguro,p.numero_poliza,p.titular,p.prima_monto,p.prima_periodicidad,p.fecha_inicio,p.fecha_vencimiento,p.estado];
-    });
-  } else if (tipo === 'por_vencer') {
-    nombre = 'GSG_Polizas_Por_Vencer';
-    encabezados = ['Cliente','Teléfono','Aseguradora','Tipo','N° Póliza','Prima','Vencimiento','Días restantes'];
-    datos = allPolizas.filter(p => {
-      const d = diasRestantes(p.fecha_vencimiento);
-      return d >= 0 && d <= 30;
-    }).map(p => {
-      const c = allClientes.find(x => x.id === p.cliente_id);
-      return [c?.nombre_completo,c?.telefono,p.aseguradora,p.tipo_seguro,p.numero_poliza,p.prima_monto,p.fecha_vencimiento,diasRestantes(p.fecha_vencimiento)];
-    });
-  } else if (tipo === 'clientes') {
-    nombre = 'GSG_Directorio_Clientes';
-    encabezados = ['Nombre','RFC','Tipo','Teléfono','Correo','Dirección','CP','Pólizas'];
-    datos = allClientes.map(c => {
-      const pol = allPolizas.filter(p => p.cliente_id === c.id).length;
-      return [c.nombre_completo,c.rfc,c.tipo,c.telefono,c.correo,c.direccion,c.codigo_postal,pol];
-    });
-  } else if (tipo === 'aseguradora') {
-    nombre = 'GSG_Reporte_Aseguradoras';
-    encabezados = ['Aseguradora','Clientes','Pólizas','Prima Total'];
-    const stats = {};
-    Object.keys(ASEG_COLORS).forEach(a => stats[a] = {clientes:new Set(),polizas:0,prima:0});
-    allPolizas.forEach(p => {
-      if (stats[p.aseguradora]) {
-        if (p.cliente_id) stats[p.aseguradora].clientes.add(p.cliente_id);
-        stats[p.aseguradora].polizas++;
-        stats[p.aseguradora].prima += Number(p.prima_monto||0);
+async function autenticarDrive() {
+  await cargarGoogleAPI();
+  return new Promise((resolve, reject) => {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: DRIVE_CLIENT_ID,
+      scope: DRIVE_SCOPE,
+      callback: (resp) => {
+        if (resp.error) { reject(resp.error); return; }
+        driveToken = resp.access_token;
+        resolve(driveToken);
       }
     });
-    datos = Object.entries(stats).map(([a,s]) => [a, s.clientes.size, s.polizas, s.prima]);
-  }
-
-  const ws = XLSX.utils.aoa_to_sheet([encabezados, ...datos]);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Datos');
-  XLSX.writeFile(wb, nombre + '_' + new Date().toISOString().slice(0,10) + '.xlsx');
-  toast('Archivo Excel descargado ✓', 'success');
+    client.requestAccessToken();
+  });
 }
 
-// ─── LOGIN ───────────────────────────────────────────────────
-const SESSION_KEY = 'gsg_auth';
-
-function mostrarDashboard() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('sidebar').style.display = 'flex';
-  document.getElementById('main').style.display = 'flex';
-  cargarDatos();
+async function crearCarpetaDrive(nombre, padreId) {
+  if (!driveToken) await autenticarDrive();
+  const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${driveToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: nombre, mimeType: 'application/vnd.google-apps.folder', parents: [padreId] })
+  });
+  const data = await res.json();
+  return data.id;
 }
 
-function hacerLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPass').value;
-  const err   = document.getElementById('loginError');
-  err.style.display = 'none';
+async function buscarCarpetaDrive(nombre, padreId) {
+  if (!driveToken) await autenticarDrive();
+  const q = encodeURIComponent(`name='${nombre}' and '${padreId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+    headers: { 'Authorization': `Bearer ${driveToken}` }
+  });
+  const data = await res.json();
+  return data.files?.[0]?.id || null;
+}
 
-  // Usamos Netlify Identity widget para autenticar
-  if (window.netlifyIdentity) {
-    netlifyIdentity.open('login');
-    return;
-  }
-  // Credenciales de acceso
-  const USER = 'agente.gsgseguros@gmail.com';
-  const PASS = 'GSGSeguros2025';
-  if (email.toLowerCase() === USER && pass === PASS) {
-    sessionStorage.setItem(SESSION_KEY, '1');
-    mostrarDashboard();
-  } else {
-    err.style.display = 'block';
+async function obtenerOCrearCarpetaCliente(nombreCliente) {
+  try {
+    if (!driveToken) await autenticarDrive();
+    let carpetaId = await buscarCarpetaDrive(nombreCliente, DRIVE_ROOT_FOLDER);
+    if (!carpetaId) {
+      carpetaId = await crearCarpetaDrive(nombreCliente, DRIVE_ROOT_FOLDER);
+      toast(`Carpeta creada en Drive: ${nombreCliente}`, 'success');
+    }
+    return carpetaId;
+  } catch (e) {
+    toast('Error al conectar con Google Drive', 'error');
+    return null;
   }
 }
 
-function cerrarSesion() {
-  sessionStorage.removeItem(SESSION_KEY);
-  if (window.netlifyIdentity) netlifyIdentity.logout();
-  location.reload();
-}
-
-// ─── INIT ────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  // Netlify Identity
-  if (window.netlifyIdentity) {
-    netlifyIdentity.on('init', user => {
-      if (user) mostrarDashboard();
+async function subirArchivoDrive(archivo, carpetaId, clienteId, polizaId) {
+  if (!driveToken) await autenticarDrive();
+  const meta = { name: archivo.name, parents: [carpetaId] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+  form.append('file', archivo);
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${driveToken}` },
+    body: form
+  });
+  const data = await res.json();
+  if (data.id) {
+    await db.from('documentos').insert({
+      cliente_id: clienteId,
+      poliza_id: polizaId || null,
+      nombre_archivo: archivo.name,
+      tipo: 'otro',
+      drive_file_id: data.id,
+      drive_url: data.webViewLink
     });
-    netlifyIdentity.on('login', user => {
-      netlifyIdentity.close();
-      mostrarDashboard();
-    });
-    netlifyIdentity.on('logout', () => location.reload());
-    netlifyIdentity.init();
-  } else {
-    // Si ya hay sesión guardada
-    if (sessionStorage.getItem(SESSION_KEY)) mostrarDashboard();
+    toast(`Archivo subido: ${archivo.name}`, 'success');
+    return data;
   }
-});
+  throw new Error('Error al subir archivo');
+}
+
+async function abrirCarpetaClienteEnDrive(clienteId) {
+  const c = allClientes.find(x => x.id === clienteId);
+  if (!c) return;
+  toast('Conectando con Google Drive...', '');
+  const carpetaId = await obtenerOCrearCarpetaCliente(c.nombre_completo);
+  if (carpetaId) {
+    window.open(`https://drive.google.com/drive/folders/${carpetaId}`, '_blank');
+    await db.from('clientes').update({ notas: c.notas }).eq('id', clienteId);
+  }
+}
+
+async function manejarSubidaArchivo(clienteId, polizaId) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx';
+  input.onchange = async (e) => {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+    const c = allClientes.find(x => x.id === clienteId);
+    if (!c) return;
+    toast('Subiendo archivo...', '');
+    try {
+      const carpetaId = await obtenerOCrearCarpetaCliente(c.nombre_completo);
+      if (carpetaId) await subirArchivoDrive(archivo, carpetaId, clienteId, polizaId);
+    } catch (err) {
+      toast('Error al subir el archivo', 'error');
+    }
+  };
+  input.click();
+}
 </script>
 </body>
 </html>
